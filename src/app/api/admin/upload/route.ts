@@ -25,9 +25,22 @@ export async function POST(req: NextRequest) {
 
   const ext = file.type.split("/")[1].replace("jpeg", "jpg");
   const filename = `${randomUUID()}.${ext}`;
+
+  // En Vercel (y cualquier hosting serverless) el sistema de archivos es
+  // efímero: si hay un token de Vercel Blob configurado, subimos ahí para
+  // que las imágenes persistan. En desarrollo local, sin token, se guardan
+  // en /public/uploads.
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { put } = await import("@vercel/blob");
+    const blob = await put(`uploads/${filename}`, file, {
+      access: "public",
+      addRandomSuffix: false,
+    });
+    return NextResponse.json({ url: blob.url });
+  }
+
   const uploadsDir = path.join(process.cwd(), "public", "uploads");
   await mkdir(uploadsDir, { recursive: true });
-
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(path.join(uploadsDir, filename), buffer);
 

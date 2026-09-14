@@ -1,0 +1,15 @@
+<svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" gradientTransform="rotate(270)">
+      <stop offset="0%" stop-color="#e2ac9a"/>
+      <stop offset="100%" stop-color="#8a4f3b"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="#171217"/>
+  <rect x="40" y="40" width="720" height="720" rx="24" fill="url(#g)" opacity="0.92"/>
+  <circle cx="400" cy="340" r="130" fill="#ffffff" opacity="0.14"/>
+  <path d="M400 250c-16-40-52-66-88-60-14 2-26 10-32 22-7 14 0 28 15 31 22 4 49-14 63-33" stroke="#ffffff" stroke-opacity="0.5" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M400 250c16-40 52-66 88-60 14 2 26 10 32 22 7 14 0 28-15 31-22 4-49-14-63-33" stroke="#ffffff" stroke-opacity="0.5" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <text x="400" y="620" font-family="Georgia, 'Playfair Display', serif" font-size="34" fill="#2a1f22" text-anchor="middle" opacity="0.85">Bondage y Accesorios</text>
+  <text x="400" y="660" font-family="Arial, sans-serif" font-size="16" letter-spacing="4" fill="#2a1f22" text-anchor="middle" opacity="0.55">RITUAL.COM</text>
+</svg>

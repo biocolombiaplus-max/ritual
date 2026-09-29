@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-const KEYS = ["logo", "hero", "banner_promo"];
+const KEYS = ["logo", "hero", "banner_promo", "brand_story", "newsletter"];
 
 export async function GET() {
   const sections = await prisma.siteSection.findMany();

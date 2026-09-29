@@ -109,7 +109,7 @@ rama conectada — no necesitas repetir estos pasos.
 ## Funcionalidades
 
 ### Tienda
-- Home con banner principal editable, categorías, destacados y banner promocional.
+- Home premium con banner principal, barra de beneficios, categorías, sección "cómo funciona tu pedido discreto" (proceso de compra en pasos), destacados, "Nuestra filosofía" (historia de marca), recién llegados, testimonios, banner promocional y captura de newsletter — todo editable desde el admin, sin tocar código.
 - Catálogo (`/tienda`) con filtro por categoría y buscador.
 - Página de producto con galería, upsell ("combina bien con esto") y aviso de envío gratis progresivo.
 - Carrito persistente (localStorage) con barra de envío gratis y sugerencias de productos (cross-sell), igual que las grandes tiendas.
@@ -122,9 +122,10 @@ rama conectada — no necesitas repetir estos pasos.
 - **Dashboard**: resumen de productos, pedidos y ventas.
 - **Productos**: crear, editar, activar/desactivar y eliminar productos, con subida de múltiples imágenes por producto, precio, precio anterior (para mostrar descuento), stock, SKU, categoría y destacados.
 - **⚡ Carga rápida** (`/admin/productos/carga-rapida`): el flujo tipo "subir muchas fotos y publicar rápido" de las grandes tiendas online. Eliges de una vez todas las fotos de productos que tengas (por ejemplo, las que te llegan por WhatsApp), las agrupas tocándolas (varias fotos de un mismo producto, o "cada foto = 1 producto"), completas nombre/categoría/precio en la tarjeta de cada borrador y publicas todo con un solo botón. Con `ANTHROPIC_API_KEY` configurada, el botón "✨ IA" mira la foto y sugiere nombre, categoría y descripción automáticamente — siempre revisables antes de publicar.
-- **Secciones e imágenes**: sube el logo de Ritual.com y edita las imágenes/textos del banner principal y del banner promocional del home, sin tocar código.
+- **Secciones e imágenes**: sube el logo de Ritual.com y edita las imágenes/textos del banner principal, la sección "Nuestra filosofía" (marca), el banner promocional y el newsletter — todo sin tocar código.
+- **Contenido de inicio** (`/admin/contenido`): administra la barra de beneficios, los pasos de "cómo funciona tu pedido" y los testimonios que aparecen en la home — agregar, editar, reordenar, ocultar o eliminar cada uno.
 - **Importar productos**: sube un archivo y crea muchos productos a la vez (ver detalle abajo).
-- **Pedidos**: lista de pedidos generados desde el checkout, con cambio de estado (pendiente, confirmado, enviado, entregado, cancelado).
+- **Pedidos**: lista de pedidos generados desde el checkout, con cambio de estado (pendiente, confirmado, enviado, entregado, cancelado), alerta sonora/notificación cuando entra uno nuevo, y creación de pedidos manuales (`/admin/pedidos/nuevo`) para ventas por WhatsApp o Instagram.
 
 ## Importación masiva de productos — ¿qué archivo debo subir?
 

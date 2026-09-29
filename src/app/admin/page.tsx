@@ -61,7 +61,11 @@ export default async function AdminDashboard() {
         </Link>
         <Link href="/admin/secciones" className="card p-6 hover:border-rose-400 transition-colors">
           <h3 className="font-display text-lg mb-1">Editar página de inicio</h3>
-          <p className="text-sm text-muted">Cambia las imágenes y textos del banner principal.</p>
+          <p className="text-sm text-muted">Cambia las imágenes y textos del banner, la filosofía de marca y el newsletter.</p>
+        </Link>
+        <Link href="/admin/contenido" className="card p-6 hover:border-rose-400 transition-colors">
+          <h3 className="font-display text-lg mb-1">Contenido de inicio</h3>
+          <p className="text-sm text-muted">Beneficios, pasos de &ldquo;cómo funciona&rdquo; y testimonios de clientas/es.</p>
         </Link>
         <Link href="/admin/pedidos" className="card p-6 hover:border-rose-400 transition-colors">
           <h3 className="font-display text-lg mb-1">Ver pedidos</h3>

@@ -62,6 +62,24 @@ function bannerSvg() {
 </svg>`;
 }
 
+function brandStorySvg() {
+  return `<svg width="1200" height="900" viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#171217"/>
+      <stop offset="55%" stop-color="#241a1e"/>
+      <stop offset="100%" stop-color="#2f2024"/>
+    </linearGradient>
+    <radialGradient id="glow3" cx="70%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#d29a84" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#d29a84" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg3)"/>
+  <rect width="1200" height="900" fill="url(#glow3)"/>
+</svg>`;
+}
+
 const categories = [
   "Vibradores",
   "Lubricantes y Aceites",
@@ -83,5 +101,6 @@ for (const cat of categories) {
 
 writeFileSync(path.join(outDir, "hero.svg"), heroSvg());
 writeFileSync(path.join(outDir, "banner.svg"), bannerSvg());
+writeFileSync(path.join(outDir, "brand-story.svg"), brandStorySvg());
 
-console.log(`Generados ${id} placeholders de producto + hero + banner en public/seed`);
+console.log(`Generados ${id} placeholders de producto + hero + banner + brand-story en public/seed`);

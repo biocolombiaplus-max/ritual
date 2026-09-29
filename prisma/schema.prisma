@@ -54,6 +54,31 @@ model SiteSection {
   linkText String?
 }
 
+// Bloques de contenido repetibles de la home, agrupados por "group":
+// "benefit" (barra de beneficios), "process" (cómo funciona tu pedido) y
+// "testimonial" (reseñas). Un solo modelo flexible en vez de una tabla por
+// sección, editable desde /admin/contenido.
+model ContentItem {
+  id        String   @id @default(uuid())
+  group     String
+  icon      String?
+  title     String
+  subtitle  String?
+  body      String?
+  rating    Int?
+  position  Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([group, position])
+}
+
+model Subscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
 model Order {
   id            String   @id @default(uuid())
   code          String   @unique

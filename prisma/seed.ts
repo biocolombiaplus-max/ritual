@@ -288,6 +288,62 @@ async function main() {
     },
   });
 
+  await prisma.siteSection.upsert({
+    where: { key: "brand_story" },
+    update: {},
+    create: {
+      key: "brand_story",
+      title: "El placer también se cultiva",
+      subtitle:
+        "En Ritual.com creemos que el bienestar íntimo merece el mismo cuidado que cualquier otro ritual de tu vida. Seleccionamos cada pieza pensando en tu piel, tu privacidad y tu placer — sin prejuicios, sin apuros y sin que nadie más tenga por qué saberlo.",
+      imageUrl: "/seed/brand-story.svg",
+      linkUrl: "/tienda",
+      linkText: "Conoce la colección",
+    },
+  });
+
+  await prisma.siteSection.upsert({
+    where: { key: "newsletter" },
+    update: {},
+    create: {
+      key: "newsletter",
+      title: "Únete y recibe 10% en tu primera compra",
+      subtitle: "Sé la primera persona en enterarte de lanzamientos y ofertas exclusivas. 100% privado, cero spam.",
+    },
+  });
+
+  console.log("Configurando contenido de inicio...");
+  await prisma.contentItem.deleteMany();
+
+  const BENEFITS = [
+    { title: "Envío discreto", subtitle: "Sin logos en el empaque" },
+    { title: "Gratis desde $198.000", subtitle: "A todo Colombia" },
+    { title: "Pago 100% seguro", subtitle: "Tarjetas, PSE y contraentrega" },
+    { title: "Calidad premium", subtitle: "Materiales certificados" },
+  ];
+  for (const [i, b] of BENEFITS.entries()) {
+    await prisma.contentItem.create({ data: { group: "benefit", position: i, ...b } });
+  }
+
+  const PROCESS = [
+    { icon: "🛍️", title: "Elige con total privacidad", body: "Explora el catálogo sin registro obligatorio. Tu historial de compra es solo tuyo." },
+    { icon: "📦", title: "Empacamos con discreción", body: "Caja o bolsa neutra, sin logos ni referencias al contenido. Ni la transportadora lo sabe." },
+    { icon: "💳", title: "Pagas como prefieras", body: "Tarjeta, PSE, Nequi, Bancolombia o contraentrega — lo que te quede más cómodo." },
+    { icon: "🚚", title: "Recíbelo donde estés", body: "Entrega en cualquier ciudad de Colombia, directo en la puerta de tu casa." },
+  ];
+  for (const [i, p] of PROCESS.entries()) {
+    await prisma.contentItem.create({ data: { group: "process", position: i, ...p } });
+  }
+
+  const TESTIMONIALS = [
+    { title: "Valentina R.", subtitle: "Bogotá", rating: 5, body: "Pedí sin miedo de que alguien se enterara y llegó en una caja totalmente neutra. Superó mis expectativas." },
+    { title: "Camilo M.", subtitle: "Medellín", rating: 5, body: "La calidad es justo la que prometen, nada de imitación barata. Y llegó en dos días a mi casa." },
+    { title: "Laura P.", subtitle: "Cali", rating: 5, body: "El servicio por WhatsApp fue muy amable y resolvieron todas mis dudas sin juzgar nada. Repito seguro." },
+  ];
+  for (const [i, t] of TESTIMONIALS.entries()) {
+    await prisma.contentItem.create({ data: { group: "testimonial", position: i, ...t } });
+  }
+
   console.log("Listo.");
 }
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { resizeForUpload, toBase64Jpeg } from "@/lib/imageResize";
+import { extractImagesFromZip } from "@/lib/zipImages";
 import QuickDraftCard, { type QuickDraft as Draft, type QuickPhoto as Photo } from "@/components/admin/QuickDraftCard";
 
 // Carga rápida: sube muchas fotos de una sola vez (por ejemplo las que ya
@@ -39,6 +40,7 @@ function newDraft(photoIds: string[], defaults: { categoryName: string; price: s
 
 export default function CargaRapidaPage() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -46,6 +48,8 @@ export default function CargaRapidaPage() {
   const [defaults, setDefaults] = useState({ categoryName: "", price: "" });
   const [publishing, setPublishing] = useState(false);
   const [aiAvailable, setAiAvailable] = useState(true);
+  const [dragActive, setDragActive] = useState(false);
+  const [zipStatus, setZipStatus] = useState<{ state: "extracting" | "done" | "error"; message: string } | null>(null);
 
   const photoById = (id: string) => photos.find((p) => p.id === id);
   const usedIds = new Set(drafts.flatMap((d) => d.photoIds));
@@ -64,12 +68,41 @@ export default function CargaRapidaPage() {
   }, [photos]);
   useEffect(() => () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.preview)), []);
 
-  function addFiles(list: FileList | null) {
-    if (!list?.length) return;
-    const added: Photo[] = Array.from(list)
+  function addImageFiles(files: File[]) {
+    if (!files.length) return;
+    const added: Photo[] = files
       .filter((f) => f.type.startsWith("image/"))
       .map((file) => ({ id: uid(), file, preview: URL.createObjectURL(file) }));
     setPhotos((prev) => [...prev, ...added]);
+  }
+
+  async function addZipFile(zipFile: File) {
+    setZipStatus({ state: "extracting", message: `Descomprimiendo ${zipFile.name}...` });
+    try {
+      const { files, skipped, truncated } = await extractImagesFromZip(zipFile);
+      if (files.length === 0) {
+        setZipStatus({ state: "error", message: "No encontramos imágenes dentro de ese ZIP." });
+        return;
+      }
+      addImageFiles(files);
+      const parts = [`✓ Se agregaron ${files.length} foto${files.length > 1 ? "s" : ""} del ZIP`];
+      if (skipped > 0) parts.push(`${skipped} archivo${skipped > 1 ? "s" : ""} no era${skipped > 1 ? "n" : ""} imágenes y se ignoraron`);
+      if (truncated) parts.push(`se tomaron solo las primeras ${files.length} (el ZIP tenía más)`);
+      setZipStatus({ state: "done", message: parts.join(" · ") });
+      setTimeout(() => setZipStatus(null), 6000);
+    } catch {
+      setZipStatus({ state: "error", message: "No pudimos leer ese archivo. Verifica que sea un .zip válido." });
+    }
+  }
+
+  function handleDroppedFiles(fileList: FileList) {
+    const files = Array.from(fileList);
+    const zipFile = files.find((f) => f.name.toLowerCase().endsWith(".zip") || f.type === "application/zip");
+    if (zipFile) {
+      addZipFile(zipFile);
+      return;
+    }
+    addImageFiles(files);
   }
 
   function toggleSelect(id: string) {
@@ -272,19 +305,62 @@ export default function CargaRapidaPage() {
           multiple
           className="hidden"
           onChange={(e) => {
-            addFiles(e.target.files);
+            addImageFiles(Array.from(e.target.files ?? []));
             e.target.value = "";
           }}
         />
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="mt-4 flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-rose-400/40 bg-background-soft px-4 py-8 text-center transition-colors hover:border-rose-400"
+        <input
+          ref={zipInputRef}
+          type="file"
+          accept=".zip,application/zip,application/x-zip-compressed"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files?.[0]) addZipFile(e.target.files[0]);
+            e.target.value = "";
+          }}
+        />
+
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragActive(true);
+          }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragActive(false);
+            if (e.dataTransfer.files?.length) handleDroppedFiles(e.dataTransfer.files);
+          }}
+          className={`mt-4 flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-10 text-center transition-colors ${
+            dragActive ? "border-rose-400 bg-rose-400/10" : "border-rose-400/40 bg-background-soft"
+          }`}
         >
-          <span className="text-3xl">📥</span>
-          <span className="text-base font-bold uppercase">Elegir fotos</span>
-          <span className="text-xs text-muted">Puedes seleccionar muchas a la vez desde tu galería o WhatsApp</span>
-        </button>
+          <span className="text-3xl">{dragActive ? "🗂️" : "📥"}</span>
+          <span className="text-base font-bold uppercase">Arrastra tus fotos o un ZIP aquí</span>
+          <span className="text-xs text-muted max-w-sm">
+            Puedes soltar muchas imágenes a la vez, o una carpeta comprimida (.zip) con todo tu catálogo — la
+            descomprimimos por ti automáticamente.
+          </span>
+          <div className="mt-3 flex flex-wrap justify-center gap-3">
+            <button type="button" onClick={() => inputRef.current?.click()} className="btn-secondary text-sm">
+              🖼️ Elegir fotos
+            </button>
+            <button type="button" onClick={() => zipInputRef.current?.click()} className="btn-secondary text-sm">
+              🗜️ Subir archivo .zip
+            </button>
+          </div>
+        </div>
+
+        {zipStatus && (
+          <p
+            className={`mt-3 text-xs font-medium ${
+              zipStatus.state === "error" ? "text-red-400" : zipStatus.state === "extracting" ? "text-muted" : "text-rose-300"
+            }`}
+          >
+            {zipStatus.state === "extracting" && "⏳ "}
+            {zipStatus.message}
+          </p>
+        )}
 
         {tray.length > 0 && (
           <>

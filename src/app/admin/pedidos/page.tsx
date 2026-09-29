@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatCOP } from "@/lib/format";
 
@@ -57,7 +58,12 @@ export default function PedidosPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl mb-6">Pedidos</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h1 className="font-display text-2xl">Pedidos</h1>
+        <Link href="/admin/pedidos/nuevo" className="btn-primary whitespace-nowrap">
+          + Nuevo pedido
+        </Link>
+      </div>
 
       {loading ? (
         <p className="text-muted text-sm">Cargando...</p>

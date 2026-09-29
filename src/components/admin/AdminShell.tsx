@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
+import OrderAlert from "./OrderAlert";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", exact: true },
@@ -86,7 +87,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             ))}
           </nav>
         </header>
-        <main className="p-4 sm:p-8">{children}</main>
+        <main className="p-4 sm:p-8">
+          <OrderAlert />
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -41,8 +41,14 @@ export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
           </p>
         </div>
       </div>
-      <div className="border-t border-surface-border py-4 text-center text-xs text-muted">
-        © {new Date().getFullYear()} Ritual.com — Todos los derechos reservados. Venta exclusiva a mayores de 18 años.
+      <div className="border-t border-surface-border py-6 text-center text-xs text-muted flex flex-col items-center gap-3">
+        <p>© {new Date().getFullYear()} Ritual.com — Todos los derechos reservados. Venta exclusiva a mayores de 18 años.</p>
+        <Link
+          href="/admin/login"
+          className="rounded-full border border-surface-border px-4 py-1.5 text-muted/60 transition-colors hover:border-rose-400/50 hover:text-muted"
+        >
+          Iniciar sesión
+        </Link>
       </div>
     </footer>
   );

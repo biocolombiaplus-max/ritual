@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { uniqueProductSlug } from "@/lib/slug";
+import { resolveCategoryId } from "@/lib/category";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -27,6 +28,10 @@ interface ProductInput {
   stock: number;
   weightGrams?: number;
   categoryId?: string | null;
+  // Alternativa a categoryId: nombre libre de categoría. Si ambos vienen,
+  // categoryName gana — se busca o se crea la categoría por su nombre (útil
+  // para la carga rápida, donde el admin solo escribe el nombre).
+  categoryName?: string | null;
   featured?: boolean;
   active?: boolean;
   images: string[];
@@ -40,6 +45,9 @@ export async function POST(req: NextRequest) {
   }
 
   const slug = await uniqueProductSlug(body.name);
+  const categoryId = body.categoryName
+    ? await resolveCategoryId(body.categoryName)
+    : body.categoryId || null;
 
   const product = await prisma.product.create({
     data: {
@@ -52,7 +60,7 @@ export async function POST(req: NextRequest) {
       sku: body.sku?.trim() || null,
       stock: body.stock ?? 0,
       weightGrams: body.weightGrams ?? 300,
-      categoryId: body.categoryId || null,
+      categoryId,
       featured: !!body.featured,
       active: body.active ?? true,
       images: {

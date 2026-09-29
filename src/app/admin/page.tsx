@@ -34,6 +34,22 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
+      <Link
+        href="/admin/productos/carga-rapida"
+        className="block card p-6 mb-6 border-rose-400/50 bg-gradient-to-r from-rose-400/10 to-transparent hover:border-rose-400 transition-colors"
+      >
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h3 className="font-display text-xl mb-1">⚡ Carga rápida de productos</h3>
+            <p className="text-sm text-muted">
+              Sube muchas fotos a la vez (por ejemplo, las que te llegan por WhatsApp), agrúpalas por producto y
+              publica todo en minutos — con autocompletado por IA opcional.
+            </p>
+          </div>
+          <span className="btn-primary shrink-0">Empezar</span>
+        </div>
+      </Link>
+
       <div className="grid md:grid-cols-2 gap-6 mb-10">
         <Link href="/admin/productos/nuevo" className="card p-6 hover:border-rose-400 transition-colors">
           <h3 className="font-display text-lg mb-1">Agregar producto</h3>

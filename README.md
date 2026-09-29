@@ -38,6 +38,7 @@ para el panel administrativo.
 | `AUTH_SECRET` | Secreto para firmar la sesión del admin (usa un valor largo y aleatorio en producción) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Número de WhatsApp (con indicativo, sin +) para confirmar pedidos |
 | `BLOB_READ_WRITE_TOKEN` | Token de Vercel Blob para guardar imágenes subidas. Vacío en local (se guardan en `public/uploads`); en Vercel se agrega solo al crear el Blob Store |
+| `ANTHROPIC_API_KEY` | Opcional. Activa el botón "✨ IA" de Carga rápida (autocompletar nombre/categoría/descripción desde la foto). Sin ella, todo lo demás funciona igual |
 
 **Cambia `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `AUTH_SECRET` antes de publicar el sitio.**
 
@@ -120,6 +121,7 @@ rama conectada — no necesitas repetir estos pasos.
 ### Panel administrativo (`/admin`)
 - **Dashboard**: resumen de productos, pedidos y ventas.
 - **Productos**: crear, editar, activar/desactivar y eliminar productos, con subida de múltiples imágenes por producto, precio, precio anterior (para mostrar descuento), stock, SKU, categoría y destacados.
+- **⚡ Carga rápida** (`/admin/productos/carga-rapida`): el flujo tipo "subir muchas fotos y publicar rápido" de las grandes tiendas online. Eliges de una vez todas las fotos de productos que tengas (por ejemplo, las que te llegan por WhatsApp), las agrupas tocándolas (varias fotos de un mismo producto, o "cada foto = 1 producto"), completas nombre/categoría/precio en la tarjeta de cada borrador y publicas todo con un solo botón. Con `ANTHROPIC_API_KEY` configurada, el botón "✨ IA" mira la foto y sugiere nombre, categoría y descripción automáticamente — siempre revisables antes de publicar.
 - **Secciones e imágenes**: sube el logo de Ritual.com y edita las imágenes/textos del banner principal y del banner promocional del home, sin tocar código.
 - **Importar productos**: sube un archivo y crea muchos productos a la vez (ver detalle abajo).
 - **Pedidos**: lista de pedidos generados desde el checkout, con cambio de estado (pendiente, confirmado, enviado, entregado, cancelado).

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { uniqueProductSlug } from "@/lib/slug";
-import slugify from "slugify";
+import { resolveCategoryId } from "@/lib/category";
 import type { ImportRow } from "@/lib/import";
 
 export async function POST(req: NextRequest) {
@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No hay productos para importar" }, { status: 400 });
   }
 
-  const categoryCache = new Map<string, string>();
   let created = 0;
   const errors: string[] = [];
 
@@ -21,23 +20,7 @@ export async function POST(req: NextRequest) {
       continue;
     }
 
-    let categoryId: string | null = null;
-    const categoryName = row.category?.trim();
-    if (categoryName) {
-      if (categoryCache.has(categoryName.toLowerCase())) {
-        categoryId = categoryCache.get(categoryName.toLowerCase())!;
-      } else {
-        const slug = slugify(categoryName, { lower: true, strict: true, locale: "es" });
-        const category = await prisma.category.upsert({
-          where: { slug },
-          update: {},
-          create: { name: categoryName, slug, position: await prisma.category.count() },
-        });
-        categoryCache.set(categoryName.toLowerCase(), category.id);
-        categoryId = category.id;
-      }
-    }
-
+    const categoryId = await resolveCategoryId(row.category);
     const slug = await uniqueProductSlug(row.name);
 
     await prisma.product.create({

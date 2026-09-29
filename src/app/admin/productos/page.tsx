@@ -50,6 +50,9 @@ export default function ProductosPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+          <Link href="/admin/productos/carga-rapida" className="btn-secondary whitespace-nowrap">
+            ⚡ Carga rápida
+          </Link>
           <Link href="/admin/productos/nuevo" className="btn-primary whitespace-nowrap">
             + Nuevo producto
           </Link>

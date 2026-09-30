@@ -46,6 +46,9 @@ export default function ProductForm({ initial }: { initial?: ProductData }) {
   const [newCategory, setNewCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aiAvailable, setAiAvailable] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiNote, setAiNote] = useState<string | null>(null);
   const router = useRouter();
   const isEdit = !!initial?.id;
 
@@ -54,6 +57,64 @@ export default function ProductForm({ initial }: { initial?: ProductData }) {
       .then((r) => r.json())
       .then((d) => setCategories(d.categories ?? []));
   }, []);
+
+  async function aiFill() {
+    if (!form.images[0]) {
+      setAiNote("Sube al menos una foto primero.");
+      return;
+    }
+    setAiLoading(true);
+    setAiNote(null);
+    try {
+      const res = await fetch("/api/admin/ai-describe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: form.images[0], categories: categories.map((c) => c.name) }),
+      });
+      if (res.status === 503) {
+        const data = await res.json().catch(() => ({}));
+        if (data.error === "not_configured") setAiAvailable(false);
+        setAiNote(
+          data.error === "not_configured" ? "La IA no está activada todavía." : "La IA está ocupada, intenta en un momento."
+        );
+        return;
+      }
+      if (!res.ok) throw new Error();
+      const { suggestion } = (await res.json()) as {
+        suggestion: { name: string; categoryName: string; shortDescription: string; description: string };
+      };
+
+      let categoryId = form.categoryId;
+      const match = categories.find((c) => c.name.toLowerCase() === suggestion.categoryName.toLowerCase());
+      if (match) {
+        categoryId = match.id;
+      } else if (suggestion.categoryName) {
+        const catRes = await fetch("/api/admin/categories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: suggestion.categoryName }),
+        });
+        const catData = await catRes.json();
+        if (catRes.ok) {
+          setCategories((c) => [...c, catData.category]);
+          categoryId = catData.category.id;
+        }
+      }
+
+      setForm((f) => ({
+        ...f,
+        name: suggestion.name,
+        shortDescription: suggestion.shortDescription,
+        description: suggestion.description,
+        categoryId,
+      }));
+      setAiNote(`✨ Sugerido: ${suggestion.name}. Revísalo antes de guardar.`);
+    } catch {
+      setAiNote("No pudimos autocompletar. Escribe los datos a mano.");
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   async function addCategory() {
     if (!newCategory.trim()) return;
@@ -227,6 +288,22 @@ export default function ProductForm({ initial }: { initial?: ProductData }) {
       <div className="card p-6 space-y-4">
         <h2 className="font-display text-lg">Imágenes del producto</h2>
         <ImageUploader images={form.images} onChange={(images) => setForm({ ...form, images })} />
+        {aiAvailable && (
+          <div className="rounded-xl bg-background-soft p-3">
+            <button
+              type="button"
+              onClick={aiFill}
+              disabled={aiLoading || !form.images[0]}
+              className="btn-secondary w-full disabled:opacity-50"
+            >
+              {aiLoading ? "⏳ Generando..." : "✨ Autocompletar nombre y descripción con IA"}
+            </button>
+            <p className="mt-2 text-[11px] text-muted">
+              Usa la primera foto para sugerir nombre, categoría y descripción. Revísalo antes de guardar.
+            </p>
+            {aiNote && <p className="mt-1.5 text-[11px] font-medium text-rose-300">{aiNote}</p>}
+          </div>
+        )}
       </div>
 
       <div className="card p-6 space-y-3">

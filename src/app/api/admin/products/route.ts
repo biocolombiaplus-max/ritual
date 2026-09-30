@@ -38,37 +38,45 @@ interface ProductInput {
 }
 
 export async function POST(req: NextRequest) {
-  const body: ProductInput = await req.json();
+  try {
+    const body: ProductInput = await req.json();
 
-  if (!body.name || !body.description || body.price === undefined) {
-    return NextResponse.json({ error: "Nombre, descripción y precio son obligatorios" }, { status: 400 });
-  }
+    if (!body.name || !body.description || body.price === undefined) {
+      return NextResponse.json({ error: "Nombre, descripción y precio son obligatorios" }, { status: 400 });
+    }
 
-  const slug = await uniqueProductSlug(body.name);
-  const categoryId = body.categoryName
-    ? await resolveCategoryId(body.categoryName)
-    : body.categoryId || null;
+    const slug = await uniqueProductSlug(body.name);
+    const categoryId = body.categoryName
+      ? await resolveCategoryId(body.categoryName)
+      : body.categoryId || null;
 
-  const product = await prisma.product.create({
-    data: {
-      slug,
-      name: body.name.trim(),
-      shortDescription: body.shortDescription?.trim() || null,
-      description: body.description.trim(),
-      price: Math.round(body.price),
-      compareAtPrice: body.compareAtPrice ? Math.round(body.compareAtPrice) : null,
-      sku: body.sku?.trim() || null,
-      stock: body.stock ?? 0,
-      weightGrams: body.weightGrams ?? 300,
-      categoryId,
-      featured: !!body.featured,
-      active: body.active ?? true,
-      images: {
-        create: (body.images ?? []).map((url, i) => ({ url, position: i })),
+    const product = await prisma.product.create({
+      data: {
+        slug,
+        name: body.name.trim(),
+        shortDescription: body.shortDescription?.trim() || null,
+        description: body.description.trim(),
+        price: Math.round(body.price),
+        compareAtPrice: body.compareAtPrice ? Math.round(body.compareAtPrice) : null,
+        sku: body.sku?.trim() || null,
+        stock: body.stock ?? 0,
+        weightGrams: body.weightGrams ?? 300,
+        categoryId,
+        featured: !!body.featured,
+        active: body.active ?? true,
+        images: {
+          create: (body.images ?? []).map((url, i) => ({ url, position: i })),
+        },
       },
-    },
-    include: { images: true, category: true },
-  });
+      include: { images: true, category: true },
+    });
 
-  return NextResponse.json({ product });
+    return NextResponse.json({ product });
+  } catch (error) {
+    console.error("create product:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "No se pudo crear el producto" },
+      { status: 500 }
+    );
+  }
 }

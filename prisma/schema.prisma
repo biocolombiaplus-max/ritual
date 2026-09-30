@@ -111,5 +111,20 @@ model Order {
   shippingCost  Int
   total         Int
   status        String   @default("pendiente")
+  // Estado real del cobro en Wompi: pendiente | aprobado | declinado | error | anulado
+  paymentStatus String   @default("pendiente")
+  paymentMethod String?
+  wompiReference   String? @unique
+  wompiTransactionId String? @unique
   createdAt     DateTime @default(now())
+}
+
+// Suscripciones de notificaciones push del navegador (panel administrativo)
+// para avisar sonido + notificación cuando entra un pago aprobado.
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
 }

@@ -9,26 +9,30 @@ export default function FreeShippingBar({ subtotal }: { subtotal: number }) {
 
   return (
     <div>
-      <p className="text-sm mb-2">
+      <p className="text-sm mb-2 flex items-center gap-1.5">
         {achieved ? (
-          <span className="text-rose-300 font-medium">
-            ¡Felicidades! Tu pedido tiene envío gratis 🎉
+          <span className="text-rose-300 font-medium flex items-center gap-1.5">
+            🎁 ¡Tu pedido ya tiene envío gratis!
           </span>
         ) : (
           <>
-            Te faltan{" "}
-            <span className="text-rose-300 font-semibold">
-              {formatCOP(remaining)}
-            </span>{" "}
-            para obtener <span className="font-semibold">envío gratis</span>
+            <span>🚚 Te faltan</span>
+            <span className="text-rose-300 font-semibold">{formatCOP(remaining)}</span>
+            <span>para <span className="font-semibold">envío gratis</span></span>
           </>
         )}
       </p>
-      <div className="h-2 w-full rounded-full bg-surface-border overflow-hidden">
+      <div className="relative h-2.5 w-full rounded-full bg-surface-border overflow-hidden">
         <div
-          className="h-full bg-gradient-rose transition-all duration-500"
+          className="h-full bg-gradient-rose transition-all duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
+      </div>
+      <div className="flex justify-between mt-1.5 text-[10px] text-muted">
+        <span>$0</span>
+        <span className={achieved ? "text-rose-300 font-semibold" : ""}>
+          {formatCOP(FREE_SHIPPING_THRESHOLD)} 🎁
+        </span>
       </div>
     </div>
   );

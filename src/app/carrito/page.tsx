@@ -109,6 +109,20 @@ export default function CarritoPage() {
             <Link href="/checkout" className="btn-primary w-full">
               Finalizar compra
             </Link>
+            <div className="grid grid-cols-3 gap-2 mt-5 pt-5 border-t border-surface-border text-center">
+              <div>
+                <p className="text-lg">🔒</p>
+                <p className="text-[10px] text-muted mt-1">Envío 100% discreto</p>
+              </div>
+              <div>
+                <p className="text-lg">⚡</p>
+                <p className="text-[10px] text-muted mt-1">Mismo día en Medellín</p>
+              </div>
+              <div>
+                <p className="text-lg">💳</p>
+                <p className="text-[10px] text-muted mt-1">Pago 100% seguro</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

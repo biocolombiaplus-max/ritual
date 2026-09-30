@@ -67,6 +67,10 @@ export default async function AdminDashboard() {
           <h3 className="font-display text-lg mb-1">Contenido de inicio</h3>
           <p className="text-sm text-muted">Beneficios, pasos de &ldquo;cómo funciona&rdquo; y testimonios de clientas/es.</p>
         </Link>
+        <Link href="/admin/envios" className="card p-6 hover:border-rose-400 transition-colors">
+          <h3 className="font-display text-lg mb-1">🚚 Envíos por zona</h3>
+          <p className="text-sm text-muted">Fija tarifas por departamento o municipio y revisa la regla de mismo día en Medellín.</p>
+        </Link>
         <Link href="/admin/pedidos" className="card p-6 hover:border-rose-400 transition-colors">
           <h3 className="font-display text-lg mb-1">Ver pedidos</h3>
           <p className="text-sm text-muted">Revisa los pedidos generados desde el checkout.</p>

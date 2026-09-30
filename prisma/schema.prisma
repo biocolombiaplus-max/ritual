@@ -79,6 +79,23 @@ model Subscriber {
   createdAt DateTime @default(now())
 }
 
+// Tarifas de envío personalizadas por departamento/municipio, para anular
+// las tarifas de referencia por defecto (útil para marcar zonas más caras
+// o para fijar el precio del mensajero local en la ciudad de la tienda).
+// city = "" significa "tarifa por defecto de todo el departamento".
+model ShippingRate {
+  id         String   @id @default(uuid())
+  department String
+  city       String   @default("")
+  cost       Int
+  etaLabel   String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([department, city])
+}
+
 model Order {
   id            String   @id @default(uuid())
   code          String   @unique

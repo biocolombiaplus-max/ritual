@@ -344,6 +344,18 @@ async function main() {
     await prisma.contentItem.create({ data: { group: "testimonial", position: i, ...t } });
   }
 
+  console.log("Configurando tarifa de envío local (Medellín)...");
+  await prisma.shippingRate.deleteMany();
+  await prisma.shippingRate.create({
+    data: {
+      department: "Antioquia",
+      city: "Medellín",
+      cost: 8900,
+      etaLabel: null, // la regla de "mismo día antes de las 3pm" se calcula automáticamente
+      active: true,
+    },
+  });
+
   console.log("Listo.");
 }
 

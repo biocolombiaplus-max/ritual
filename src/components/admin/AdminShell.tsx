@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/secciones", label: "Secciones e imágenes" },
   { href: "/admin/contenido", label: "Contenido de inicio" },
   { href: "/admin/importar", label: "Importar productos" },
+  { href: "/admin/envios", label: "🚚 Envíos" },
   { href: "/admin/pedidos", label: "Pedidos" },
 ];
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { quoteShipping } from "@/lib/colombia";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/format";
+import { computeShipping } from "@/lib/shipping";
 
 interface CheckoutItem {
   productId: string;
@@ -45,7 +44,7 @@ export async function POST(req: NextRequest) {
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shipping = quoteShipping(department, city, subtotal, FREE_SHIPPING_THRESHOLD);
+  const shipping = await computeShipping(department, city, subtotal);
   const total = subtotal + shipping.cost;
 
   const order = await prisma.order.create({
@@ -70,6 +69,6 @@ export async function POST(req: NextRequest) {
     subtotal,
     shippingCost: shipping.cost,
     total,
-    eta: shipping.eta,
+    eta: shipping.etaLabel,
   });
 }

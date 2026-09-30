@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cart";
 import { formatCOP } from "@/lib/format";
 import ShippingCalculator from "@/components/ShippingCalculator";
+import FreeShippingBar from "@/components/FreeShippingBar";
 
 export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
@@ -150,7 +151,10 @@ export default function CheckoutPage() {
 
         <div className="card p-6 h-fit sticky top-24 space-y-4">
           <h2 className="font-display text-xl">Resumen del pedido</h2>
-          <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+
+          <FreeShippingBar subtotal={subtotal} />
+
+          <div className="space-y-2 max-h-64 overflow-y-auto pr-1 border-t border-surface-border pt-4">
             {items.map((i) => (
               <div key={i.productId} className="flex justify-between text-sm">
                 <span className="text-muted">
@@ -165,9 +169,12 @@ export default function CheckoutPage() {
               <span className="text-muted">Subtotal</span>
               <span>{formatCOP(subtotal)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-start">
               <span className="text-muted">Envío</span>
-              <span>{shipping ? (shipping.cost === 0 ? "Gratis" : formatCOP(shipping.cost)) : "Por calcular"}</span>
+              <span className="text-right">
+                {shipping ? (shipping.cost === 0 ? "Gratis" : formatCOP(shipping.cost)) : "Por calcular"}
+                {shipping?.eta && <span className="block text-[11px] text-rose-300">{shipping.eta}</span>}
+              </span>
             </div>
             <div className="flex justify-between font-display text-lg pt-2 border-t border-surface-border">
               <span>Total</span>
@@ -180,6 +187,10 @@ export default function CheckoutPage() {
           <Link href="/carrito" className="btn-secondary w-full">
             Volver al carrito
           </Link>
+          <div className="flex items-center justify-center gap-4 pt-3 border-t border-surface-border text-[11px] text-muted">
+            <span>🔒 Compra segura</span>
+            <span>📦 Empaque discreto</span>
+          </div>
         </div>
       </form>
     </div>

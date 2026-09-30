@@ -364,18 +364,6 @@ export function getCityTier(departmentName: string, cityName: string): CityTier 
   return city?.tier ?? dept.defaultTier;
 }
 
-export function quoteShipping(
-  departmentName: string,
-  cityName: string,
-  subtotal: number,
-  freeShippingThreshold: number
-): { cost: number; tier: CityTier; eta: string; free: boolean } {
-  const tier = getCityTier(departmentName, cityName);
-  const free = subtotal >= freeShippingThreshold;
-  return {
-    cost: free ? 0 : SHIPPING_RATES[tier],
-    tier,
-    eta: SHIPPING_ETA[tier],
-    free,
-  };
-}
+// La cotización real (con anulaciones de /admin/envios y la regla de
+// mismo día en Medellín) vive en src/lib/shipping.ts — este archivo solo
+// aporta los datos geográficos y las tarifas de referencia por nivel.

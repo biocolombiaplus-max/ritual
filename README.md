@@ -126,6 +126,7 @@ rama conectada — no necesitas repetir estos pasos.
 - **Contenido de inicio** (`/admin/contenido`): administra la barra de beneficios, los pasos de "cómo funciona tu pedido" y los testimonios que aparecen en la home — agregar, editar, reordenar, ocultar o eliminar cada uno.
 - **Importar productos**: sube un archivo y crea muchos productos a la vez (ver detalle abajo).
 - **Pedidos**: lista de pedidos generados desde el checkout, con cambio de estado (pendiente, confirmado, enviado, entregado, cancelado), alerta sonora/notificación cuando entra uno nuevo, y creación de pedidos manuales (`/admin/pedidos/nuevo`) para ventas por WhatsApp o Instagram.
+- **🚚 Envíos** (`/admin/envios`): fija tarifas personalizadas por departamento (o por un municipio específico dentro de él) para marcar zonas más costosas de cubrir, sin tocar código. Lo que no personalices usa las tarifas de referencia por nivel de cobertura. Incluye la regla automática de **mismo día en Medellín** para pedidos pagados antes de las 3:00 p.m. (ver detalle abajo).
 
 ## Importación masiva de productos — ¿qué archivo debo subir?
 
@@ -159,10 +160,29 @@ imagen embebidos, así que hay dos formas de asociarlas:
 Bogotá D.C.) con sus principales ciudades y una tarifa de referencia por
 "nivel" de cobertura (capital, ciudad intermedia, municipio apartado, zona
 especial). Son tarifas **estimadas** inspiradas en rangos públicos de
-transportadoras como Interrapidísimo y Servientrega para paquetes
+transportadoras como Interrapidísimo, TCC y Servientrega para paquetes
 pequeños. Para tarifas exactas en tiempo real, el siguiente paso es
-integrar la API oficial de la transportadora elegida — el cotizador ya
-está aislado en ese archivo para conectarlo fácilmente.
+integrar la API oficial de la transportadora elegida.
+
+`src/lib/shipping.ts` es el cotizador real que usan el checkout, la
+calculadora pública y el pedido manual del admin. Para cada departamento +
+municipio resuelve, en este orden:
+
+1. Tarifa personalizada exacta para ese municipio (creada en `/admin/envios`).
+2. Tarifa personalizada para todo el departamento (si no hay una específica del municipio).
+3. Tarifa de referencia por nivel de cobertura (si no hay ninguna personalizada).
+
+Así puedes dejar todo el país con las tarifas de referencia y solo
+intervenir las zonas que realmente necesitan un precio distinto (más caras
+de cubrir, o — como Medellín, sede de la tienda — más baratas por ser
+mensajería local).
+
+**Regla de mismo día en Medellín:** cualquier pedido con destino Medellín
+muestra automáticamente "Hoy mismo" como tiempo de entrega si se paga
+antes de las 3:00 p.m. hora Colombia (después de esa hora, "Mañana antes
+del mediodía"). Se calcula con la hora real de Bogotá (`America/Bogota`),
+sin depender del huso horario del navegador ni del servidor — no requiere
+configuración.
 
 ## Limitaciones conocidas / próximos pasos
 

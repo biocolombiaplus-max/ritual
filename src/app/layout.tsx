@@ -16,7 +16,10 @@ const displayFont = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Ritual.com | Tienda premium para adultos",
+  title: {
+    default: "Ritual.com | Tienda premium para adultos",
+    template: "%s | Ritual.com",
+  },
   description:
     "Ritual.com — tienda online premium de bienestar y placer para adultos en Colombia. Envío discreto, envío gratis desde $198.000 y cotizador de envíos a todo el país.",
 };

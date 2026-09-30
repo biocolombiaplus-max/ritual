@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -16,6 +17,32 @@ async function getProduct(slug: string) {
       category: true,
     },
   });
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product || !product.active) return {};
+
+  const description = product.shortDescription || product.description.slice(0, 155);
+  const image = product.images[0]?.url;
+
+  return {
+    title: product.name,
+    description,
+    alternates: { canonical: `/producto/${product.slug}` },
+    openGraph: {
+      title: product.name,
+      description,
+      locale: "es_CO",
+      type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
+  };
 }
 
 export default async function ProductPage({

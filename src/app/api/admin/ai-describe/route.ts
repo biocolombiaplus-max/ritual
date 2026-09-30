@@ -16,7 +16,9 @@ export const maxDuration = 30;
 const Suggestion = z.object({
   name: z
     .string()
-    .describe("Nombre comercial corto y claro del producto, ej: 'Vibrador Silk Touch'. Sin emojis."),
+    .describe(
+      "Nombre comercial corto (máx 60 caracteres) para el título de la página en Google: tipo de producto + material o característica clave, en el orden en que un comprador colombiano lo buscaría. Ej: 'Vibrador de Silicona Recargable — Silk Touch'. Sin emojis, sin relleno de palabras clave."
+    ),
   categoryName: z
     .string()
     .describe(
@@ -24,11 +26,13 @@ const Suggestion = z.object({
     ),
   shortDescription: z
     .string()
-    .describe("Una frase corta (máx 12 palabras) para la tarjeta del producto, profesional y discreta."),
+    .describe(
+      "Meta descripción para buscadores: 120 a 155 caracteres, en español de Colombia, con el término principal de búsqueda al inicio y un motivo de compra claro (ej: envío discreto, calidad premium). Debe funcionar tanto en la tarjeta del producto como en el resultado de Google. Profesional y discreta, nunca explícita."
+    ),
   description: z
     .string()
     .describe(
-      "2 a 3 frases de venta en español neutro, tono profesional y discreto propio de una tienda de bienestar íntimo premium. Menciona material, características y uso general. Nunca uses lenguaje explícito ni gráfico."
+      "3 a 4 frases de venta en español de Colombia, tono profesional y discreto propio de una tienda de bienestar íntimo premium. Incluye de forma natural (sin forzar ni repetir) los términos que un comprador colombiano usaría para encontrar este producto, además de material, características, uso general y beneficio del envío discreto a toda Colombia. Nunca uses lenguaje explícito ni gráfico, y nunca repitas la misma palabra clave más de dos veces."
     ),
 });
 
@@ -36,8 +40,9 @@ type SuggestionData = z.infer<typeof Suggestion>;
 type AnthropicMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
 
 function buildPrompt(categories: string[]) {
-  return `Eres el asistente de catálogo de Ritual.com, una tienda online premium de bienestar y placer para adultos en Colombia. Mira la foto del producto y sugiere una ficha de catálogo profesional, discreta y elegante — igual que la de cualquier tienda de bienestar íntimo seria (nunca lenguaje explícito o gráfico).
+  return `Eres el especialista en catálogo y SEO de Ritual.com, una tienda online premium de bienestar y placer para adultos que vende en toda Colombia. Mira la foto del producto y redacta una ficha de catálogo profesional, discreta y elegante, optimizada para que este producto se posicione bien en Google para compradores colombianos — igual que haría un redactor SEO senior de una tienda de bienestar íntimo seria (nunca lenguaje explícito o gráfico, nunca relleno artificial de palabras clave).
 Categorías existentes en la tienda: ${categories.join(", ") || "ninguna todavía"}.
+Piensa primero en cómo buscaría este producto un comprador en Colombia (ej: "vibrador para mujer", "juguete íntimo discreto Medellín", "lubricante a base de agua") y usa ese lenguaje de forma natural en el nombre y las descripciones, sin sonar forzado ni repetitivo.
 Si no reconoces el producto exacto, usa una descripción genérica corta acorde a lo que se ve en la foto (ej: "Vibrador de silicona", "Aceite de masaje").`;
 }
 
@@ -52,12 +57,21 @@ class AiBusyError extends Error {}
 const GEMINI_SCHEMA = {
   type: "OBJECT",
   properties: {
-    name: { type: "STRING", description: "Nombre comercial corto y claro, ej: 'Vibrador Silk Touch'. Sin emojis." },
+    name: {
+      type: "STRING",
+      description:
+        "Nombre comercial corto (máx 60 caracteres) para el título de la página en Google, con el término de búsqueda principal primero. Sin emojis, sin relleno de palabras clave.",
+    },
     categoryName: { type: "STRING", description: "Categoría en español, reutilizando una existente si aplica." },
-    shortDescription: { type: "STRING", description: "Frase corta (máx 12 palabras), profesional y discreta." },
+    shortDescription: {
+      type: "STRING",
+      description:
+        "Meta descripción para Google: 120 a 155 caracteres, español de Colombia, término principal al inicio, motivo de compra claro, profesional y discreta.",
+    },
     description: {
       type: "STRING",
-      description: "2 a 3 frases de venta, tono profesional y discreto, sin lenguaje explícito.",
+      description:
+        "3 a 4 frases de venta en español de Colombia con lenguaje de búsqueda natural (sin repetir palabras clave), tono profesional y discreto, sin lenguaje explícito.",
     },
   },
   required: ["name", "categoryName", "shortDescription", "description"],

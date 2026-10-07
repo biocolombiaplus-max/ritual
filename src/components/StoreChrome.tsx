@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import AgeGate from "./AgeGate";
 import CartDrawer from "./CartDrawer";
+import WhatsAppFloat from "./WhatsAppFloat";
 
 export default function StoreChrome({
   children,
@@ -25,6 +26,7 @@ export default function StoreChrome({
       <main className="flex-1">{children}</main>
       <Footer logoUrl={logoUrl} />
       <CartDrawer />
+      <WhatsAppFloat />
     </>
   );
 }

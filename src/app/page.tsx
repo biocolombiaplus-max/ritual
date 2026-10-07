@@ -5,6 +5,7 @@ import ProductCard from "@/components/ProductCard";
 import PaymentLogos from "@/components/PaymentLogos";
 import NewsletterForm from "@/components/NewsletterForm";
 import { formatCOP, FREE_SHIPPING_THRESHOLD } from "@/lib/format";
+import { FAQS } from "@/lib/faq";
 
 export const dynamic = "force-dynamic";
 
@@ -269,6 +270,32 @@ export default async function Home() {
               {t.subtitle && <p className="text-xs text-muted">{t.subtitle}</p>}
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Preguntas frecuentes */}
+      <section className="bg-background-soft border-y border-surface-border py-16">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <div className="text-center mb-10">
+            <span className="text-xs tracking-[0.3em] text-rose-300 uppercase">Resolvemos tus dudas</span>
+            <h2 className="font-display text-2xl sm:text-3xl mt-3">Antes de comprar</h2>
+          </div>
+          <div className="space-y-4">
+            {FAQS.slice(0, 4).map((f) => (
+              <details key={f.q} className="card p-5 group">
+                <summary className="cursor-pointer font-medium list-none flex justify-between items-center gap-4">
+                  {f.q}
+                  <span className="text-rose-300 shrink-0 group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <p className="text-sm text-muted mt-3">{f.a}</p>
+              </details>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/preguntas-frecuentes" className="text-sm text-rose-300 hover:underline">
+              Ver todas las preguntas frecuentes
+            </Link>
+          </div>
         </div>
       </section>
 

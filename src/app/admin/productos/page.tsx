@@ -91,7 +91,17 @@ export default function ProductosPage() {
                       </div>
                       <div>
                         <p className="font-medium">{p.name}</p>
-                        {p.featured && <span className="text-[10px] text-rose-300">Destacado</span>}
+                        <div className="flex items-center gap-2">
+                          {p.featured && <span className="text-[10px] text-rose-300">Destacado</span>}
+                          {p.images[0]?.url.includes("public.blob.vercel-storage.com") && (
+                            <span
+                              className="text-[10px] font-semibold text-amber-400"
+                              title="Esta foto quedó en el Blob Store de Vercel suspendido. Edita el producto y vuelve a subirla."
+                            >
+                              ⚠ Foto rota, resubir
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </td>

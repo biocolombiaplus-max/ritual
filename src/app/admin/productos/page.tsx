@@ -20,6 +20,12 @@ export default function ProductosPage() {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [migrating, setMigrating] = useState(false);
+  const [migrateNote, setMigrateNote] = useState<string | null>(null);
+
+  const brokenCount = products.filter((p) =>
+    p.images[0]?.url.includes("public.blob.vercel-storage.com")
+  ).length;
 
   async function load() {
     setLoading(true);
@@ -37,6 +43,41 @@ export default function ProductosPage() {
     if (!confirm("¿Eliminar este producto? Esta acción no se puede deshacer.")) return;
     await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
     load();
+  }
+
+  async function recoverBrokenImages() {
+    setMigrating(true);
+    setMigrateNote(null);
+    let totalMigrated = 0;
+    let lastFailed: { productName: string; reason: string }[] = [];
+    try {
+      for (let i = 0; i < 50; i++) {
+        const res = await fetch("/api/admin/migrate-images", { method: "POST" });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          setMigrateNote(data?.error ?? "No se pudo ejecutar la recuperación.");
+          break;
+        }
+        totalMigrated += data.migrated.length;
+        lastFailed = data.failed;
+        if (data.migrated.length === 0 && data.failed.length === 0) break; // nada más por procesar
+        if (data.remaining === 0) break;
+      }
+      const parts = [`✅ ${totalMigrated} foto(s) recuperada(s) automáticamente.`];
+      if (lastFailed.length > 0) {
+        parts.push(
+          `⚠ ${lastFailed.length} no se pudieron recuperar (Vercel ya no las sirve) — hay que resubirlas a mano: ${lastFailed
+            .map((f) => f.productName)
+            .join(", ")}.`
+        );
+      }
+      setMigrateNote(parts.join(" "));
+      load();
+    } catch {
+      setMigrateNote("Ocurrió un error de red durante la recuperación. Intenta de nuevo.");
+    } finally {
+      setMigrating(false);
+    }
   }
 
   return (
@@ -58,6 +99,21 @@ export default function ProductosPage() {
           </Link>
         </div>
       </div>
+
+      {brokenCount > 0 && (
+        <div className="card p-4 mb-6 border-amber-400/40 bg-amber-400/5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm">
+              <span className="font-semibold text-amber-400">⚠ {brokenCount} producto(s)</span> con foto alojada en
+              el Blob Store de Vercel suspendido.
+            </p>
+            <button onClick={recoverBrokenImages} disabled={migrating} className="btn-secondary whitespace-nowrap disabled:opacity-50">
+              {migrating ? "⏳ Recuperando..." : "🔄 Recuperar fotos automáticamente"}
+            </button>
+          </div>
+          {migrateNote && <p className="text-xs text-muted mt-3">{migrateNote}</p>}
+        </div>
+      )}
 
       {loading ? (
         <p className="text-muted text-sm">Cargando...</p>

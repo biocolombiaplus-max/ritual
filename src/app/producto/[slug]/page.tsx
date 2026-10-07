@@ -6,6 +6,8 @@ import { formatCOP } from "@/lib/format";
 import ProductGallery from "@/components/ProductGallery";
 import AddToCartPanel from "@/components/AddToCartPanel";
 import ProductCard from "@/components/ProductCard";
+import { getWhatsappNumber } from "@/lib/settings";
+import { productMessage, waLink } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +68,13 @@ export default async function ProductPage({
 
   const hasDiscount =
     product.compareAtPrice && product.compareAtPrice > product.price;
+  const lowStock = product.stock > 0 && product.stock <= 5;
+
+  const whatsapp = await getWhatsappNumber();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ritual.com";
+  const whatsappHref = whatsapp
+    ? waLink(whatsapp, productMessage({ name: product.name, price: product.price, slug: product.slug }, appUrl))
+    : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
@@ -108,6 +117,12 @@ export default async function ProductPage({
             )}
           </div>
 
+          {lowStock && (
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-400">
+              ⚡ ¡Solo quedan {product.stock} unidades disponibles!
+            </p>
+          )}
+
           <div className="mt-6">
             <AddToCartPanel
               productId={product.id}
@@ -118,6 +133,20 @@ export default async function ProductPage({
               stock={product.stock}
             />
           </div>
+
+          {whatsappHref && (
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 shrink-0">
+                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.33 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.07c-.24.68-1.4 1.3-1.93 1.37-.5.07-1.1.1-1.77-.11a16.3 16.3 0 0 1-1.58-.58c-2.78-1.2-4.6-4.02-4.74-4.2-.14-.19-1.14-1.51-1.14-2.88s.72-2.04.98-2.32c.26-.28.56-.35.75-.35h.54c.17 0 .4-.06.63.48.24.57.8 1.97.87 2.11.07.14.12.3.02.49-.1.19-.15.3-.29.47-.14.16-.3.36-.43.49-.14.14-.29.29-.12.57.17.28.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.33 1.44.28.14.44.12.6-.07.17-.19.72-.84.91-1.13.19-.28.38-.24.64-.14.26.09 1.65.78 1.93.92.28.14.47.21.54.33.07.12.07.68-.17 1.36Z" />
+              </svg>
+              Cierra tu compra por WhatsApp
+            </a>
+          )}
 
           <div className="mt-8 grid grid-cols-3 gap-3 text-center text-xs text-muted">
             <div className="card p-3">Envío discreto</div>

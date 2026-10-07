@@ -1,12 +1,41 @@
-const DEFAULT_MESSAGE = "Hola, tengo una pregunta sobre un producto de Ritual.com 🙂";
+"use client";
 
-export default function WhatsAppFloat() {
-  const number = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-  if (!number) return null;
+import { usePathname } from "next/navigation";
+import { useCartStore } from "@/store/cart";
+import {
+  adviceMessage,
+  cartMessage,
+  catalogMessage,
+  generalMessage,
+  shippingMessage,
+  waLink,
+} from "@/lib/whatsapp";
+
+// El mensaje cambia según la página desde la que escribe la clienta, para
+// que el equipo de ventas responda directo sin tener que preguntar en qué
+// puede ayudar.
+function messageForPath(pathname: string, items: ReturnType<typeof useCartStore.getState>["items"], subtotal: number): string {
+  if (pathname.startsWith("/producto/")) {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    return `¡Hola Ritual.com! 👋\nQuiero cerrar mi compra de este producto 🛍️\n\n${url}\n\n¿Me confirman disponibilidad y envío discreto?`;
+  }
+  if (pathname.startsWith("/carrito") && items.length > 0) return cartMessage(items, subtotal);
+  if (pathname.startsWith("/tienda")) return catalogMessage();
+  if (pathname.startsWith("/envios")) return shippingMessage();
+  if (pathname.startsWith("/preguntas-frecuentes")) return adviceMessage();
+  return generalMessage();
+}
+
+export default function WhatsAppFloat({ number }: { number: string | null }) {
+  const pathname = usePathname() ?? "/";
+  const items = useCartStore((s) => s.items);
+  const subtotal = useCartStore((s) => s.subtotal());
+
+  if (!number || pathname.startsWith("/checkout")) return null;
 
   return (
     <a
-      href={`https://wa.me/${number}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`}
+      href={waLink(number, messageForPath(pathname, items, subtotal))}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escríbenos por WhatsApp"

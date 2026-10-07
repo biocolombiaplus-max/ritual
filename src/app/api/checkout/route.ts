@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     city,
     notes,
     items,
+    sessionId,
   } = body as {
     customerName: string;
     phone: string;
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
     city: string;
     notes?: string;
     items: CheckoutItem[];
+    sessionId?: string;
   };
 
   if (!customerName || !phone || !address || !department || !city) {
@@ -63,6 +65,16 @@ export async function POST(req: NextRequest) {
       total,
     },
   });
+
+  if (sessionId) {
+    try {
+      await prisma.analyticsEvent.create({
+        data: { type: "purchase", sessionId: String(sessionId).slice(0, 100) },
+      });
+    } catch {
+      // La analítica nunca debe tumbar la creación del pedido.
+    }
+  }
 
   return NextResponse.json({
     code: order.code,

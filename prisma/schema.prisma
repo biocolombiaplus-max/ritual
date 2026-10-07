@@ -128,3 +128,28 @@ model PushSubscription {
   auth      String
   createdAt DateTime @default(now())
 }
+
+// Configuración editable desde el panel (clave/valor simple), por ejemplo
+// el número de WhatsApp de la tienda. Si una clave no existe acá, el
+// código cae a su variable de entorno equivalente.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// Analítica propia de la tienda: una fila por evento (vista de página,
+// vista de producto, agregar al carrito, inicio de checkout, compra), con
+// un sessionId anónimo por visitante (cookie, sin datos personales) para
+// poder armar el embudo visitantes → carrito → compra en el panel admin.
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  type      String
+  path      String?
+  sessionId String
+  productId String?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([sessionId])
+}

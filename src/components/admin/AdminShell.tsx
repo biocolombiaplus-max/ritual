@@ -7,6 +7,7 @@ import OrderAlert from "./OrderAlert";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", exact: true },
+  { href: "/admin/analitica", label: "📊 Analítica" },
   { href: "/admin/productos", label: "Productos" },
   { href: "/admin/productos/carga-rapida", label: "⚡ Carga rápida" },
   { href: "/admin/secciones", label: "Secciones e imágenes" },
@@ -14,6 +15,7 @@ const NAV = [
   { href: "/admin/importar", label: "Importar productos" },
   { href: "/admin/envios", label: "🚚 Envíos" },
   { href: "/admin/pedidos", label: "Pedidos" },
+  { href: "/admin/configuracion", label: "⚙️ Configuración" },
 ];
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {

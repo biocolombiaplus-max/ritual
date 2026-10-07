@@ -6,6 +6,8 @@ import PaymentLogos from "@/components/PaymentLogos";
 import NewsletterForm from "@/components/NewsletterForm";
 import { formatCOP, FREE_SHIPPING_THRESHOLD } from "@/lib/format";
 import { FAQS } from "@/lib/faq";
+import { getWhatsappNumber } from "@/lib/settings";
+import { adviceMessage, educationMessage, waLink } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -29,31 +31,78 @@ const DEFAULT_TESTIMONIALS = [
   { title: "Laura P.", subtitle: "Cali", rating: 5, body: "El servicio por WhatsApp fue muy amable y resolvieron todas mis dudas sin juzgar nada. Repito seguro." },
 ];
 
+const DEFAULT_EDUCATION = [
+  {
+    icon: "🎯",
+    title: "Cómo elegir tu primer producto",
+    body: "Material, intensidad y tamaño son las tres variables clave. Si es tu primera vez, parte por algo pequeño y versátil antes de ir a opciones más intensas.",
+  },
+  {
+    icon: "🧼",
+    title: "Cuidado e higiene correctos",
+    body: "Limpia con jabón neutro o limpiador específico antes y después de cada uso, y guarda en un lugar seco, lejos de la luz directa, para que dure mucho más.",
+  },
+  {
+    icon: "💧",
+    title: "Lubricantes: cuál elegir",
+    body: "Los de base acuosa son compatibles con todos los materiales; los de silicona duran más pero no se usan con juguetes de silicona. Siempre sin perfume si tu piel es sensible.",
+  },
+  {
+    icon: "💬",
+    title: "Comunicación en pareja",
+    body: "Hablar antes sobre gustos y límites hace toda la diferencia. El bienestar íntimo también se construye con confianza y buena comunicación.",
+  },
+];
+
 async function getHomeData() {
-  const [featured, newArrivals, categories, hero, banner, brandStory, newsletter, benefits, process, testimonials] =
-    await Promise.all([
-      prisma.product.findMany({
-        where: { active: true, featured: true },
-        include: { images: { orderBy: { position: "asc" }, take: 1 }, category: true },
-        orderBy: { createdAt: "desc" },
-        take: 8,
-      }),
-      prisma.product.findMany({
-        where: { active: true },
-        include: { images: { orderBy: { position: "asc" }, take: 1 }, category: true },
-        orderBy: { createdAt: "desc" },
-        take: 4,
-      }),
-      prisma.category.findMany({ orderBy: { position: "asc" }, include: { _count: { select: { products: true } } } }),
-      prisma.siteSection.findUnique({ where: { key: "hero" } }),
-      prisma.siteSection.findUnique({ where: { key: "banner_promo" } }),
-      prisma.siteSection.findUnique({ where: { key: "brand_story" } }),
-      prisma.siteSection.findUnique({ where: { key: "newsletter" } }),
-      prisma.contentItem.findMany({ where: { group: "benefit", active: true }, orderBy: { position: "asc" } }),
-      prisma.contentItem.findMany({ where: { group: "process", active: true }, orderBy: { position: "asc" } }),
-      prisma.contentItem.findMany({ where: { group: "testimonial", active: true }, orderBy: { position: "asc" } }),
-    ]);
-  return { featured, newArrivals, categories, hero, banner, brandStory, newsletter, benefits, process, testimonials };
+  const [
+    featured,
+    newArrivals,
+    categories,
+    hero,
+    banner,
+    brandStory,
+    newsletter,
+    benefits,
+    process,
+    testimonials,
+    education,
+  ] = await Promise.all([
+    prisma.product.findMany({
+      where: { active: true, featured: true },
+      include: { images: { orderBy: { position: "asc" }, take: 1 }, category: true },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+    }),
+    prisma.product.findMany({
+      where: { active: true },
+      include: { images: { orderBy: { position: "asc" }, take: 1 }, category: true },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    }),
+    prisma.category.findMany({ orderBy: { position: "asc" }, include: { _count: { select: { products: true } } } }),
+    prisma.siteSection.findUnique({ where: { key: "hero" } }),
+    prisma.siteSection.findUnique({ where: { key: "banner_promo" } }),
+    prisma.siteSection.findUnique({ where: { key: "brand_story" } }),
+    prisma.siteSection.findUnique({ where: { key: "newsletter" } }),
+    prisma.contentItem.findMany({ where: { group: "benefit", active: true }, orderBy: { position: "asc" } }),
+    prisma.contentItem.findMany({ where: { group: "process", active: true }, orderBy: { position: "asc" } }),
+    prisma.contentItem.findMany({ where: { group: "testimonial", active: true }, orderBy: { position: "asc" } }),
+    prisma.contentItem.findMany({ where: { group: "education", active: true }, orderBy: { position: "asc" } }),
+  ]);
+  return {
+    featured,
+    newArrivals,
+    categories,
+    hero,
+    banner,
+    brandStory,
+    newsletter,
+    benefits,
+    process,
+    testimonials,
+    education,
+  };
 }
 
 export default async function Home() {
@@ -68,11 +117,14 @@ export default async function Home() {
     benefits,
     process,
     testimonials,
+    education,
   } = await getHomeData();
 
   const benefitItems = benefits.length > 0 ? benefits : DEFAULT_BENEFITS;
   const processItems = process.length > 0 ? process : DEFAULT_PROCESS;
   const testimonialItems = testimonials.length > 0 ? testimonials : DEFAULT_TESTIMONIALS;
+  const educationItems = education.length > 0 ? education : DEFAULT_EDUCATION;
+  const whatsapp = await getWhatsappNumber();
 
   return (
     <div>
@@ -98,13 +150,16 @@ export default async function Home() {
               "La colección de bienestar íntimo más exclusiva de Colombia. Calidad premium, empaque 100% discreto y envío a todo el país."}
           </p>
           <div className="flex flex-wrap gap-4 justify-center mt-8">
-            <Link href={hero?.linkUrl ?? "/tienda"} className="btn-primary">
-              {hero?.linkText ?? "Explorar la tienda"}
-            </Link>
-            <Link href="/envios" className="btn-secondary">
-              Cotizar mi envío
+            <Link
+              href={hero?.linkUrl ?? "/tienda"}
+              className="btn-primary btn-glow !px-10 !py-4 text-base"
+            >
+              {hero?.linkText ?? "Ver catálogo"}
             </Link>
           </div>
+          <p className="text-xs text-muted mt-4">
+            🔒 Pago 100% seguro · 📦 Empaque discreto · ✓ Garantía de calidad
+          </p>
         </div>
       </section>
 
@@ -222,6 +277,38 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Centro de educación y bienestar */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="text-xs tracking-[0.3em] text-rose-300 uppercase">Educación &amp; bienestar</span>
+          <h2 className="font-display text-2xl sm:text-3xl mt-3">Aprende con nosotros</h2>
+          <p className="text-muted mt-3">
+            Información clara y profesional para que tomes decisiones informadas sobre tu bienestar íntimo.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {educationItems.map((e, i) => (
+            <div key={"id" in e ? e.id : i} className="card p-6">
+              <div className="text-3xl mb-3">{e.icon ?? "✨"}</div>
+              <h3 className="font-medium mb-2">{e.title}</h3>
+              <p className="text-sm text-muted leading-relaxed">{e.body}</p>
+            </div>
+          ))}
+        </div>
+        {whatsapp && (
+          <div className="text-center mt-10">
+            <a
+              href={waLink(whatsapp, educationMessage("bienestar íntimo"))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary"
+            >
+              💬 ¿Tienes dudas? Escríbenos por WhatsApp
+            </a>
+          </div>
+        )}
+      </section>
+
       {/* Recién llegados */}
       {newArrivals.length > 0 && (
         <section className="bg-background-soft border-y border-surface-border py-16">
@@ -291,10 +378,15 @@ export default async function Home() {
               </details>
             ))}
           </div>
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link href="/preguntas-frecuentes" className="text-sm text-rose-300 hover:underline">
               Ver todas las preguntas frecuentes
             </Link>
+            {whatsapp && (
+              <a href={waLink(whatsapp, adviceMessage())} target="_blank" rel="noopener noreferrer" className="btn-secondary">
+                💬 Pide asesoría personalizada
+              </a>
+            )}
           </div>
         </div>
       </section>

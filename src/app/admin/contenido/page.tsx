@@ -81,6 +81,22 @@ export default function ContenidoPage() {
         items={items.filter((i) => i.group === "testimonial")}
         onChange={load}
       />
+
+      <ContentGroupEditor
+        group="education"
+        label="Centro de educación y bienestar"
+        help="Artículos cortos de educación sexual y bienestar íntimo que se muestran en la página de inicio, para generar confianza y posicionar la marca como experta. Ideal 3 a 6 tarjetas."
+        fields={{
+          showIcon: true,
+          titleLabel: "Título",
+          titlePlaceholder: "Ej: Cómo elegir tu primer vibrador",
+          showBody: true,
+          bodyLabel: "Resumen (2-3 frases)",
+          bodyPlaceholder: "Ej: Material, intensidad y tamaño son las tres variables clave...",
+        }}
+        items={items.filter((i) => i.group === "education")}
+        onChange={load}
+      />
     </div>
   );
 }

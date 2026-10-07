@@ -271,7 +271,7 @@ async function main() {
         "La colección de bienestar íntimo más exclusiva de Colombia. Calidad premium, empaque 100% discreto y envío a todo el país.",
       imageUrl: "/seed/hero.svg",
       linkUrl: "/tienda",
-      linkText: "Explorar la tienda",
+      linkText: "Ver catálogo",
     },
   });
 
@@ -342,6 +342,16 @@ async function main() {
   ];
   for (const [i, t] of TESTIMONIALS.entries()) {
     await prisma.contentItem.create({ data: { group: "testimonial", position: i, ...t } });
+  }
+
+  const EDUCATION = [
+    { icon: "🎯", title: "Cómo elegir tu primer producto", body: "Material, intensidad y tamaño son las tres variables clave. Si es tu primera vez, parte por algo pequeño y versátil antes de ir a opciones más intensas." },
+    { icon: "🧼", title: "Cuidado e higiene correctos", body: "Limpia con jabón neutro o limpiador específico antes y después de cada uso, y guarda en un lugar seco, lejos de la luz directa, para que dure mucho más." },
+    { icon: "💧", title: "Lubricantes: cuál elegir", body: "Los de base acuosa son compatibles con todos los materiales; los de silicona duran más pero no se usan con juguetes de silicona. Siempre sin perfume si tu piel es sensible." },
+    { icon: "💬", title: "Comunicación en pareja", body: "Hablar antes sobre gustos y límites hace toda la diferencia. El bienestar íntimo también se construye con confianza y buena comunicación." },
+  ];
+  for (const [i, e] of EDUCATION.entries()) {
+    await prisma.contentItem.create({ data: { group: "education", position: i, ...e } });
   }
 
   console.log("Configurando tarifa de envío local (Medellín)...");

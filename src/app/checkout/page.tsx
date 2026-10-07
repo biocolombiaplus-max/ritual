@@ -7,6 +7,7 @@ import { useCartStore } from "@/store/cart";
 import { formatCOP } from "@/lib/format";
 import ShippingCalculator from "@/components/ShippingCalculator";
 import FreeShippingBar from "@/components/FreeShippingBar";
+import { getSessionId, track } from "@/lib/analytics-client";
 
 export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
@@ -25,7 +26,10 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    track("begin_checkout");
+  }, []);
 
   useEffect(() => {
     if (mounted && items.length === 0) router.replace("/carrito");
@@ -61,6 +65,7 @@ export default function CheckoutPage() {
             price: i.price,
             quantity: i.quantity,
           })),
+          sessionId: getSessionId(),
         }),
       });
       const data = await res.json();

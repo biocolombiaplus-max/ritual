@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { track } from "@/lib/analytics-client";
 
 export interface CartItem {
   productId: string;
@@ -45,6 +46,7 @@ export const useCartStore = create<CartState>()(
           }
           return { items: [...state.items, { ...item, quantity }] };
         });
+        track("add_to_cart", { productId: item.productId });
       },
       removeItem: (productId) => {
         set((state) => ({

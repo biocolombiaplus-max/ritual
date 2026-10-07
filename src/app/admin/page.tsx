@@ -1,18 +1,21 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCOP } from "@/lib/format";
+import { getFunnelStats } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const [productCount, activeCount, orderCount, orders] = await Promise.all([
+  const [productCount, activeCount, orderCount, orders, funnel] = await Promise.all([
     prisma.product.count(),
     prisma.product.count({ where: { active: true } }),
     prisma.order.count(),
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    getFunnelStats(7),
   ]);
 
   const revenue = await prisma.order.aggregate({ _sum: { total: true } });
+  const conversion = funnel.visitors > 0 ? Math.round((funnel.purchased / funnel.visitors) * 100) : 0;
 
   const cards = [
     { label: "Productos", value: productCount, href: "/admin/productos" },
@@ -24,6 +27,30 @@ export default async function AdminDashboard() {
   return (
     <div>
       <h1 className="font-display text-2xl mb-6">Dashboard</h1>
+
+      <Link
+        href="/admin/analitica"
+        className="block card p-6 mb-6 border-emerald-400/30 bg-gradient-to-r from-emerald-400/10 via-rose-400/5 to-transparent hover:border-emerald-400/60 transition-colors"
+      >
+        <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+          <h3 className="font-display text-lg">📊 Últimos 7 días</h3>
+          <span className="text-xs font-semibold text-emerald-400">Ver analítica completa →</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          {[
+            { label: "Visitantes", value: funnel.visitors },
+            { label: "Carrito", value: funnel.addedToCart },
+            { label: "Checkout", value: funnel.beganCheckout },
+            { label: "Compras", value: funnel.purchased },
+            { label: "Conversión", value: `${conversion}%` },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-xs text-muted">{s.label}</p>
+              <p className="font-display text-xl mt-0.5">{s.value}</p>
+            </div>
+          ))}
+        </div>
+      </Link>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {cards.map((c) => (

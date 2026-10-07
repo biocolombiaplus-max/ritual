@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { formatCOP } from "@/lib/format";
+import { getWhatsappNumber } from "@/lib/settings";
+import { generalMessage, waLink } from "@/lib/whatsapp";
 
 export default async function GraciasPage({
   searchParams,
@@ -7,9 +9,9 @@ export default async function GraciasPage({
   searchParams: Promise<{ code?: string; total?: string }>;
 }) {
   const { code, total } = await searchParams;
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-  const message = encodeURIComponent(
-    `Hola Ritual.com, acabo de confirmar mi pedido ${code ?? ""}. Quedo atento para coordinar el pago y el envío.`
+  const whatsapp = await getWhatsappNumber();
+  const message = generalMessage(
+    `Acabo de confirmar mi pedido ${code ?? ""}. Quedo atento para coordinar el pago y el envío.`
   );
 
   return (
@@ -30,7 +32,7 @@ export default async function GraciasPage({
       <div className="flex flex-col gap-3">
         {whatsapp && (
           <a
-            href={`https://wa.me/${whatsapp}?text=${message}`}
+            href={waLink(whatsapp, message)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary w-full"

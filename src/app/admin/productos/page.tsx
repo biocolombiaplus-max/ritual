@@ -16,16 +16,18 @@ interface ProductRow {
   images: { url: string }[];
 }
 
+const OLD_BLOB_DOMAIN = "public.blob.vercel-storage.com";
+
 export default function ProductosPage() {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
-  const [migrating, setMigrating] = useState(false);
-  const [migrateNote, setMigrateNote] = useState<string | null>(null);
+  const [onlyBroken, setOnlyBroken] = useState(false);
 
-  const brokenCount = products.filter((p) =>
-    p.images[0]?.url.includes("public.blob.vercel-storage.com")
-  ).length;
+  const brokenCount = products.filter((p) => p.images[0]?.url.includes(OLD_BLOB_DOMAIN)).length;
+  const visibleProducts = onlyBroken
+    ? products.filter((p) => p.images[0]?.url.includes(OLD_BLOB_DOMAIN))
+    : products;
 
   async function load() {
     setLoading(true);
@@ -43,41 +45,6 @@ export default function ProductosPage() {
     if (!confirm("¿Eliminar este producto? Esta acción no se puede deshacer.")) return;
     await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
     load();
-  }
-
-  async function recoverBrokenImages() {
-    setMigrating(true);
-    setMigrateNote(null);
-    let totalMigrated = 0;
-    let lastFailed: { productName: string; reason: string }[] = [];
-    try {
-      for (let i = 0; i < 50; i++) {
-        const res = await fetch("/api/admin/migrate-images", { method: "POST" });
-        const data = await res.json().catch(() => null);
-        if (!res.ok) {
-          setMigrateNote(data?.error ?? "No se pudo ejecutar la recuperación.");
-          break;
-        }
-        totalMigrated += data.migrated.length;
-        lastFailed = data.failed;
-        if (data.migrated.length === 0 && data.failed.length === 0) break; // nada más por procesar
-        if (data.remaining === 0) break;
-      }
-      const parts = [`✅ ${totalMigrated} foto(s) recuperada(s) automáticamente.`];
-      if (lastFailed.length > 0) {
-        parts.push(
-          `⚠ ${lastFailed.length} no se pudieron recuperar (Vercel ya no las sirve) — hay que resubirlas a mano: ${lastFailed
-            .map((f) => f.productName)
-            .join(", ")}.`
-        );
-      }
-      setMigrateNote(parts.join(" "));
-      load();
-    } catch {
-      setMigrateNote("Ocurrió un error de red durante la recuperación. Intenta de nuevo.");
-    } finally {
-      setMigrating(false);
-    }
   }
 
   return (
@@ -105,22 +72,31 @@ export default function ProductosPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm">
               <span className="font-semibold text-amber-400">⚠ {brokenCount} producto(s)</span> con foto alojada en
-              el Blob Store de Vercel suspendido.
+              el Blob Store de Vercel suspendido. Vercel bloqueó también la lectura de esas fotos, así que no hay
+              forma automática de recuperarlas — hay que resubirlas a mano desde &quot;Editar&quot;.
             </p>
-            <button onClick={recoverBrokenImages} disabled={migrating} className="btn-secondary whitespace-nowrap disabled:opacity-50">
-              {migrating ? "⏳ Recuperando..." : "🔄 Recuperar fotos automáticamente"}
+            <button
+              onClick={() => setOnlyBroken((v) => !v)}
+              className="btn-secondary whitespace-nowrap"
+            >
+              {onlyBroken ? "Ver todos" : "Mostrar solo estos"}
             </button>
           </div>
-          {migrateNote && <p className="text-xs text-muted mt-3">{migrateNote}</p>}
         </div>
       )}
 
       {loading ? (
         <p className="text-muted text-sm">Cargando...</p>
-      ) : products.length === 0 ? (
+      ) : visibleProducts.length === 0 ? (
         <div className="card p-10 text-center text-muted">
-          <p className="mb-4">Aún no tienes productos.</p>
-          <Link href="/admin/productos/nuevo" className="btn-primary">Crear el primero</Link>
+          {onlyBroken ? (
+            <p>No hay productos con fotos rotas 🎉</p>
+          ) : (
+            <>
+              <p className="mb-4">Aún no tienes productos.</p>
+              <Link href="/admin/productos/nuevo" className="btn-primary">Crear el primero</Link>
+            </>
+          )}
         </div>
       ) : (
         <div className="card overflow-x-auto">
@@ -136,7 +112,7 @@ export default function ProductosPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
-              {products.map((p) => (
+              {visibleProducts.map((p) => (
                 <tr key={p.id}>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
@@ -149,7 +125,7 @@ export default function ProductosPage() {
                         <p className="font-medium">{p.name}</p>
                         <div className="flex items-center gap-2">
                           {p.featured && <span className="text-[10px] text-rose-300">Destacado</span>}
-                          {p.images[0]?.url.includes("public.blob.vercel-storage.com") && (
+                          {p.images[0]?.url.includes(OLD_BLOB_DOMAIN) && (
                             <span
                               className="text-[10px] font-semibold text-amber-400"
                               title="Esta foto quedó en el Blob Store de Vercel suspendido. Edita el producto y vuelve a subirla."

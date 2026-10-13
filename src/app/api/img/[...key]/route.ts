@@ -14,15 +14,22 @@ export async function GET(
   const { key: keyParts } = await params;
   const key = keyParts.join("/");
 
-  const file = await downloadFromR2(key);
-  if (!file || !file.body) {
-    return NextResponse.json({ error: "No encontrada" }, { status: 404 });
+  try {
+    const file = await downloadFromR2(key);
+    return new NextResponse(new Uint8Array(file.body), {
+      headers: {
+        "Content-Type": file.contentType,
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+    });
+  } catch (error) {
+    console.error("img proxy error for key:", key, error);
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "No se pudo traer la imagen de R2",
+        key,
+      },
+      { status: 404 }
+    );
   }
-
-  return new NextResponse(file.body, {
-    headers: {
-      "Content-Type": file.contentType,
-      "Cache-Control": "public, max-age=31536000, immutable",
-    },
-  });
 }

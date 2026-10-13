@@ -57,21 +57,20 @@ export async function uploadToR2(buffer: Buffer, filename: string, contentType: 
 
 export async function downloadFromR2(
   key: string
-): Promise<{ body: ReadableStream | null; contentType: string } | null> {
+): Promise<{ body: Buffer; contentType: string }> {
   const { GetObjectCommand } = await import("@aws-sdk/client-s3");
   const client = await r2Client();
 
-  try {
-    const res = await client.send(
-      new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME!, Key: key })
-    );
-    return {
-      body: (res.Body as { transformToWebStream?: () => ReadableStream })?.transformToWebStream?.() ?? null,
-      contentType: res.ContentType ?? "application/octet-stream",
-    };
-  } catch {
-    return null;
-  }
+  const res = await client.send(
+    new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME!, Key: key })
+  );
+  if (!res.Body) throw new Error("R2 no devolvió contenido para esta clave");
+
+  // transformToByteArray funciona igual en cualquier runtime de Node,
+  // a diferencia de transformToWebStream que puede fallar según el
+  // entorno — mejor para un proxy que debe funcionar siempre.
+  const bytes = await (res.Body as { transformToByteArray: () => Promise<Uint8Array> }).transformToByteArray();
+  return { body: Buffer.from(bytes), contentType: res.ContentType ?? "application/octet-stream" };
 }
 
 export function randomFilename(contentType: string) {

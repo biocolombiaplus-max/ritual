@@ -6,14 +6,19 @@ import { randomUUID } from "crypto";
 // 2. Vercel Blob, si quedó configurado (compatibilidad con lo anterior).
 // 3. Filesystem local (solo development; en Vercel el filesystem es de
 //    solo lectura).
+//
+// Las imágenes de R2 NO se sirven desde su URL pública *.r2.dev — esa URL
+// está limitada por Cloudflare ("rate-limited, not recommended for
+// production") y por eso algunas fotos dejaban de cargar sin más. En su
+// lugar se sirven a través de /api/img/[...key], que las trae por la API
+// privada de R2 (sin ese límite) y las cachea de forma permanente.
 
 export function hasR2() {
   return !!(
     process.env.R2_ACCOUNT_ID &&
     process.env.R2_ACCESS_KEY_ID &&
     process.env.R2_SECRET_ACCESS_KEY &&
-    process.env.R2_BUCKET_NAME &&
-    process.env.R2_PUBLIC_URL
+    process.env.R2_BUCKET_NAME
   );
 }
 
@@ -21,9 +26,9 @@ export function hasVercelBlob() {
   return !!process.env.BLOB_READ_WRITE_TOKEN;
 }
 
-export async function uploadToR2(buffer: Buffer, filename: string, contentType: string): Promise<string> {
-  const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
-  const client = new S3Client({
+async function r2Client() {
+  const { S3Client } = await import("@aws-sdk/client-s3");
+  return new S3Client({
     region: "auto",
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
@@ -31,6 +36,11 @@ export async function uploadToR2(buffer: Buffer, filename: string, contentType: 
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
     },
   });
+}
+
+export async function uploadToR2(buffer: Buffer, filename: string, contentType: string): Promise<string> {
+  const { PutObjectCommand } = await import("@aws-sdk/client-s3");
+  const client = await r2Client();
 
   const key = `uploads/${filename}`;
   await client.send(
@@ -42,8 +52,26 @@ export async function uploadToR2(buffer: Buffer, filename: string, contentType: 
     })
   );
 
-  const base = process.env.R2_PUBLIC_URL!.replace(/\/$/, "");
-  return `${base}/${key}`;
+  return `/api/img/${key}`;
+}
+
+export async function downloadFromR2(
+  key: string
+): Promise<{ body: ReadableStream | null; contentType: string } | null> {
+  const { GetObjectCommand } = await import("@aws-sdk/client-s3");
+  const client = await r2Client();
+
+  try {
+    const res = await client.send(
+      new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME!, Key: key })
+    );
+    return {
+      body: (res.Body as { transformToWebStream?: () => ReadableStream })?.transformToWebStream?.() ?? null,
+      contentType: res.ContentType ?? "application/octet-stream",
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function randomFilename(contentType: string) {

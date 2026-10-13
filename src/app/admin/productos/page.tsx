@@ -17,17 +17,37 @@ interface ProductRow {
 }
 
 const OLD_BLOB_DOMAIN = "public.blob.vercel-storage.com";
+const RATE_LIMITED_R2_DOMAIN = ".r2.dev";
 
 export default function ProductosPage() {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [onlyBroken, setOnlyBroken] = useState(false);
+  const [fixingUrls, setFixingUrls] = useState(false);
+  const [fixNote, setFixNote] = useState<string | null>(null);
 
   const brokenCount = products.filter((p) => p.images[0]?.url.includes(OLD_BLOB_DOMAIN)).length;
+  const rateLimitedCount = products.filter((p) => p.images[0]?.url.includes(RATE_LIMITED_R2_DOMAIN)).length;
   const visibleProducts = onlyBroken
     ? products.filter((p) => p.images[0]?.url.includes(OLD_BLOB_DOMAIN))
     : products;
+
+  async function fixImageUrls() {
+    setFixingUrls(true);
+    setFixNote(null);
+    try {
+      const res = await fetch("/api/admin/fix-image-urls", { method: "POST" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? "No se pudo optimizar");
+      setFixNote(`✅ ${data.updatedProductImages} foto(s) de producto y ${data.updatedSections} de secciones ya cargan sin límite de Cloudflare.`);
+      load();
+    } catch (err) {
+      setFixNote(err instanceof Error ? err.message : "No se pudo optimizar");
+    } finally {
+      setFixingUrls(false);
+    }
+  }
 
   async function load() {
     setLoading(true);
@@ -66,6 +86,22 @@ export default function ProductosPage() {
           </Link>
         </div>
       </div>
+
+      {rateLimitedCount > 0 && (
+        <div className="card p-4 mb-6 border-sky-400/40 bg-sky-400/5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm">
+              <span className="font-semibold text-sky-400">ℹ {rateLimitedCount} producto(s)</span> con foto servida
+              desde la URL pública de Cloudflare R2, que tiene límite de tráfico y por eso a veces no carga. Se puede
+              corregir sin volver a subir nada — solo cambia por dónde se sirve la misma foto.
+            </p>
+            <button onClick={fixImageUrls} disabled={fixingUrls} className="btn-primary whitespace-nowrap disabled:opacity-50">
+              {fixingUrls ? "⏳ Optimizando..." : "⚡ Optimizar ahora"}
+            </button>
+          </div>
+          {fixNote && <p className="text-xs text-muted mt-3">{fixNote}</p>}
+        </div>
+      )}
 
       {brokenCount > 0 && (
         <div className="card p-4 mb-6 border-amber-400/40 bg-amber-400/5">

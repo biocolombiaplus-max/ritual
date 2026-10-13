@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "./SafeImage";
 import { formatCOP } from "@/lib/format";
 
 export interface ProductCardData {
@@ -28,12 +28,13 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
     >
       <div className="relative aspect-square bg-background-soft overflow-hidden">
         {product.image ? (
-          <Image
+          <SafeImage
             src={product.image}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
+            fallbackIcon="🌹"
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-muted text-sm">

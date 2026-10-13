@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "./SafeImage";
 import { useCartStore } from "@/store/cart";
 import { formatCOP } from "@/lib/format";
 import FreeShippingBar from "./FreeShippingBar";
@@ -59,7 +59,7 @@ export default function CartDrawer() {
             <div key={item.productId} className="flex gap-3">
               <div className="relative h-20 w-20 rounded-lg overflow-hidden bg-background-soft shrink-0">
                 {item.image && (
-                  <Image src={item.image} alt={item.name} fill className="object-cover" />
+                  <SafeImage src={item.image} alt={item.name} fill className="object-cover" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -100,7 +100,7 @@ export default function CartDrawer() {
                   <div key={p.id} className="flex items-center gap-3">
                     <div className="relative h-14 w-14 rounded-lg overflow-hidden bg-background-soft shrink-0">
                       {p.image && (
-                        <Image src={p.image} alt={p.name} fill className="object-cover" />
+                        <SafeImage src={p.image} alt={p.name} fill className="object-cover" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">

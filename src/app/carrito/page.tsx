@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "@/components/SafeImage";
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cart";
 import { formatCOP } from "@/lib/format";
@@ -50,7 +50,7 @@ export default function CarritoPage() {
                 <div key={item.productId} className="flex gap-4 p-4">
                   <div className="relative h-24 w-24 rounded-lg overflow-hidden bg-background-soft shrink-0">
                     {item.image && (
-                      <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      <SafeImage src={item.image} alt={item.name} fill className="object-cover" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

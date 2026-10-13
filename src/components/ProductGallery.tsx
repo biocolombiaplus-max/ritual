@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import SafeImage from "./SafeImage";
 
 export default function ProductGallery({
   images,
@@ -17,13 +17,14 @@ export default function ProductGallery({
     <div>
       <div className="relative aspect-square rounded-2xl overflow-hidden bg-background-soft card">
         {list[active] ? (
-          <Image
+          <SafeImage
             src={list[active]}
             alt={name}
             fill
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
+            fallbackIcon="🌹"
           />
         ) : (
           <div className="h-full w-full flex items-center justify-center text-muted">
@@ -41,7 +42,7 @@ export default function ProductGallery({
                 i === active ? "border-rose-400" : "border-surface-border"
               }`}
             >
-              <Image src={src} alt={`${name} ${i + 1}`} fill className="object-cover" />
+              <SafeImage src={src} alt={`${name} ${i + 1}`} fill className="object-cover" />
             </button>
           ))}
         </div>

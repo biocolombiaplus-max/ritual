@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "@/components/SafeImage";
 import { useEffect, useState } from "react";
 import { formatCOP } from "@/lib/format";
 
@@ -154,7 +154,7 @@ export default function ProductosPage() {
                     <div className="flex items-center gap-3">
                       <div className="relative h-12 w-12 rounded-lg overflow-hidden bg-background-soft shrink-0">
                         {p.images[0] && (
-                          <Image src={p.images[0].url} alt="" fill className="object-cover" />
+                          <SafeImage src={p.images[0].url} alt="" fill className="object-cover" />
                         )}
                       </div>
                       <div>

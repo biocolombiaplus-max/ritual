@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { track } from "@/lib/analytics-client";
+import { fbTrack } from "@/lib/metaPixel";
 
 export interface CartItem {
   productId: string;
@@ -47,6 +48,13 @@ export const useCartStore = create<CartState>()(
           return { items: [...state.items, { ...item, quantity }] };
         });
         track("add_to_cart", { productId: item.productId });
+        fbTrack("AddToCart", {
+          content_ids: [item.productId],
+          content_name: item.name,
+          content_type: "product",
+          value: item.price * quantity,
+          currency: "COP",
+        });
       },
       removeItem: (productId) => {
         set((state) => ({

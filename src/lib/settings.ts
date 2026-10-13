@@ -7,10 +7,12 @@ import { prisma } from "./prisma";
 
 export const SETTING_KEYS = {
   whatsappNumber: "whatsapp_number",
+  metaPixelId: "meta_pixel_id",
 } as const;
 
 const ENV_FALLBACKS: Record<string, string | undefined> = {
   [SETTING_KEYS.whatsappNumber]: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
+  [SETTING_KEYS.metaPixelId]: process.env.NEXT_PUBLIC_META_PIXEL_ID,
 };
 
 export async function getSetting(key: string): Promise<string | null> {
@@ -27,10 +29,18 @@ export async function getWhatsappNumber(): Promise<string | null> {
   return getSetting(SETTING_KEYS.whatsappNumber);
 }
 
+export async function getMetaPixelId(): Promise<string | null> {
+  return getSetting(SETTING_KEYS.metaPixelId);
+}
+
 export async function setSetting(key: string, value: string) {
   await prisma.setting.upsert({
     where: { key },
     create: { key, value },
     update: { value },
   });
+}
+
+export async function deleteSetting(key: string) {
+  await prisma.setting.deleteMany({ where: { key } });
 }

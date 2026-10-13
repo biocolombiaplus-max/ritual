@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCartStore } from "@/store/cart";
 import { formatCOP } from "@/lib/format";
 import ShippingCalculator from "@/components/ShippingCalculator";
 import FreeShippingBar from "@/components/FreeShippingBar";
 import { getSessionId, track } from "@/lib/analytics-client";
+import { fbTrack } from "@/lib/metaPixel";
 
 export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
@@ -34,6 +35,18 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (mounted && items.length === 0) router.replace("/carrito");
   }, [mounted, items.length, router]);
+
+  const firedInitiateCheckout = useRef(false);
+  useEffect(() => {
+    if (!mounted || items.length === 0 || firedInitiateCheckout.current) return;
+    firedInitiateCheckout.current = true;
+    fbTrack("InitiateCheckout", {
+      value: subtotal,
+      currency: "COP",
+      num_items: items.length,
+      content_ids: items.map((i) => i.productId),
+    });
+  }, [mounted, items, subtotal]);
 
   if (!mounted || items.length === 0) return null;
 

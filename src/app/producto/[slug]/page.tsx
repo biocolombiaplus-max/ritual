@@ -8,6 +8,7 @@ import AddToCartPanel from "@/components/AddToCartPanel";
 import ProductCard from "@/components/ProductCard";
 import { getWhatsappNumber } from "@/lib/settings";
 import { productMessage, waLink } from "@/lib/whatsapp";
+import ProductViewTracker from "@/components/ProductViewTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +79,7 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
+      <ProductViewTracker productId={product.id} name={product.name} price={product.price} />
       <nav className="text-xs text-muted mb-6 flex gap-2">
         <Link href="/" className="hover:text-rose-300">Inicio</Link>
         <span>/</span>

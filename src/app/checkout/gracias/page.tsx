@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatCOP } from "@/lib/format";
 import { getWhatsappNumber } from "@/lib/settings";
 import { generalMessage, waLink } from "@/lib/whatsapp";
+import PurchaseTracker from "@/components/PurchaseTracker";
 
 export default async function GraciasPage({
   searchParams,
@@ -16,6 +17,7 @@ export default async function GraciasPage({
 
   return (
     <div className="mx-auto max-w-lg px-4 sm:px-6 py-24 text-center">
+      {code && total && <PurchaseTracker code={code} value={Number(total)} />}
       <div className="text-5xl mb-6">🌹</div>
       <h1 className="font-display text-3xl mb-3">¡Gracias por tu pedido!</h1>
       <p className="text-muted mb-6">

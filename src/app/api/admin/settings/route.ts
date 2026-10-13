@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSetting, setSetting, SETTING_KEYS } from "@/lib/settings";
+import { deleteSetting, getSetting, setSetting, SETTING_KEYS } from "@/lib/settings";
 
 export async function GET() {
-  const whatsappNumber = await getSetting(SETTING_KEYS.whatsappNumber);
-  return NextResponse.json({ whatsappNumber });
+  const [whatsappNumber, metaPixelId] = await Promise.all([
+    getSetting(SETTING_KEYS.whatsappNumber),
+    getSetting(SETTING_KEYS.metaPixelId),
+  ]);
+  return NextResponse.json({ whatsappNumber, metaPixelId });
 }
 
 interface SettingsInput {
   whatsappNumber?: string;
+  metaPixelId?: string;
 }
 
 export async function PUT(req: NextRequest) {
@@ -21,6 +25,18 @@ export async function PUT(req: NextRequest) {
     await setSetting(SETTING_KEYS.whatsappNumber, digits);
   }
 
-  const whatsappNumber = await getSetting(SETTING_KEYS.whatsappNumber);
-  return NextResponse.json({ whatsappNumber });
+  if (body.metaPixelId !== undefined) {
+    const digits = body.metaPixelId.replace(/\D/g, "");
+    if (digits) {
+      await setSetting(SETTING_KEYS.metaPixelId, digits);
+    } else {
+      await deleteSetting(SETTING_KEYS.metaPixelId);
+    }
+  }
+
+  const [whatsappNumber, metaPixelId] = await Promise.all([
+    getSetting(SETTING_KEYS.whatsappNumber),
+    getSetting(SETTING_KEYS.metaPixelId),
+  ]);
+  return NextResponse.json({ whatsappNumber, metaPixelId });
 }

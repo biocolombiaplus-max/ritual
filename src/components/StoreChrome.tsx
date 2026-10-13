@@ -7,15 +7,18 @@ import AgeGate from "./AgeGate";
 import CartDrawer from "./CartDrawer";
 import WhatsAppFloat from "./WhatsAppFloat";
 import AnalyticsTracker from "./AnalyticsTracker";
+import MetaPixel from "./MetaPixel";
 
 export default function StoreChrome({
   children,
   logoUrl,
   whatsappNumber,
+  metaPixelId,
 }: {
   children: React.ReactNode;
   logoUrl?: string | null;
   whatsappNumber?: string | null;
+  metaPixelId?: string | null;
 }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
@@ -24,6 +27,7 @@ export default function StoreChrome({
 
   return (
     <>
+      <MetaPixel pixelId={metaPixelId ?? null} />
       <AnalyticsTracker />
       <AgeGate />
       <Navbar logoUrl={logoUrl} />

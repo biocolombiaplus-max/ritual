@@ -3,7 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import StoreChrome from "@/components/StoreChrome";
 import { prisma } from "@/lib/prisma";
-import { getWhatsappNumber } from "@/lib/settings";
+import { getWhatsappNumber, getMetaPixelId } from "@/lib/settings";
 
 const bodyFont = Inter({
   variable: "--font-body",
@@ -34,6 +34,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     logoUrl = null;
   }
   const whatsappNumber = await getWhatsappNumber();
+  const metaPixelId = await getMetaPixelId();
 
   return (
     <html
@@ -41,7 +42,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <StoreChrome logoUrl={logoUrl} whatsappNumber={whatsappNumber}>
+        <StoreChrome logoUrl={logoUrl} whatsappNumber={whatsappNumber} metaPixelId={metaPixelId}>
           {children}
         </StoreChrome>
       </body>

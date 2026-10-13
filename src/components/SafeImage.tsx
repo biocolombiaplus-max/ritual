@@ -14,6 +14,16 @@ function isKnownDead(src: ImageProps["src"]) {
   return typeof src === "string" && DEAD_DOMAINS.some((d) => src.includes(d));
 }
 
+// Las fotos que vienen de nuestro propio proxy (/api/img/...) se sirven
+// directo, sin pasar por el optimizador de imágenes de Next — ese
+// optimizador le pide la imagen a nuestro propio proxy en un segundo
+// salto, y si tarda un poco más de la cuenta (arranque en frío, R2 lento
+// un instante) lo marca como fallo aunque la foto exista. Para algo que
+// tiene que "nunca fallar", menos saltos es más confiable.
+function needsDirectServe(src: ImageProps["src"]) {
+  return typeof src === "string" && src.startsWith("/api/img/");
+}
+
 export default function SafeImage({
   alt,
   fallbackIcon = "🖼️",
@@ -34,5 +44,13 @@ export default function SafeImage({
     );
   }
 
-  return <Image {...props} alt={alt} className={className} onError={() => setFailed(true)} />;
+  return (
+    <Image
+      {...props}
+      alt={alt}
+      className={className}
+      unoptimized={props.unoptimized ?? needsDirectServe(props.src)}
+      onError={() => setFailed(true)}
+    />
+  );
 }

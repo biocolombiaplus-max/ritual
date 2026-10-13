@@ -132,7 +132,14 @@ export default async function Home() {
       <section className="relative overflow-hidden border-b border-surface-border">
         <div className="absolute inset-0">
           {hero?.imageUrl ? (
-            <Image src={hero.imageUrl} alt={hero.title ?? "Ritual"} fill priority className="object-cover" />
+            <Image
+              src={hero.imageUrl}
+              alt={hero.title ?? "Ritual"}
+              fill
+              priority
+              unoptimized={hero.imageUrl.startsWith("/api/img/")}
+              className="object-cover"
+            />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-[#1c1620] via-[#120f13] to-[#1c1620]" />
           )}
@@ -254,7 +261,13 @@ export default async function Home() {
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div className="relative aspect-[4/3] rounded-2xl overflow-hidden card order-2 md:order-1">
             {brandStory?.imageUrl ? (
-              <Image src={brandStory.imageUrl} alt={brandStory.title ?? "Ritual.com"} fill className="object-cover" />
+              <Image
+                src={brandStory.imageUrl}
+                alt={brandStory.title ?? "Ritual.com"}
+                fill
+                unoptimized={brandStory.imageUrl.startsWith("/api/img/")}
+                className="object-cover"
+              />
             ) : (
               <div className="h-full w-full bg-gradient-to-br from-[#2a1f24] to-[#171217] flex items-center justify-center text-muted">
                 Ritual.com
@@ -395,7 +408,13 @@ export default async function Home() {
       <section className="relative overflow-hidden border-y border-surface-border">
         <div className="absolute inset-0">
           {banner?.imageUrl ? (
-            <Image src={banner.imageUrl} alt={banner.title ?? "Promo"} fill className="object-cover" />
+            <Image
+              src={banner.imageUrl}
+              alt={banner.title ?? "Promo"}
+              fill
+              unoptimized={banner.imageUrl.startsWith("/api/img/")}
+              className="object-cover"
+            />
           ) : (
             <div className="h-full w-full bg-gradient-to-r from-[#2a1f24] to-[#171217]" />
           )}
